@@ -202,14 +202,14 @@
                 <input type="file" id="fileInput" class="hidden-input" accept=".json" onchange="handleFileImport(event)">
                 <button onclick="handleResetApp()" class="w-full py-3 bg-rose-50 text-rose-600 border border-rose-100 font-black rounded-2xl text-[9px] uppercase tracking-widest active:bg-rose-500 active:text-white transition-all">⚠️ 清空所有本地數據</button>
                 
-                <!-- Gemini API Key 區塊 -->
+                <!-- Gemini API Key 區塊 (方案A) -->
                 <div class="border-t border-slate-100 pt-4 mt-2">
                     <p class="text-[10px] font-bold text-slate-400 text-left mb-2 ml-1">AI 識圖金鑰 (Gemini API Key)</p>
                     <input type="password" id="geminiKeyInput" placeholder="在此貼上您的 API Key" class="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-xs font-bold shadow-inner outline-none mb-2 text-center dark:bg-slate-800 dark:border-slate-700 dark:text-white">
                     <button onclick="saveGeminiKey()" class="w-full py-3 bg-indigo-50 text-indigo-600 font-black rounded-xl text-[10px] uppercase tracking-widest active:scale-95 transition-all dark:bg-indigo-900/50 dark:text-indigo-400">🔑 儲存 AI 金鑰</button>
                 </div>
                 
-                <p class="pt-2 text-[10px] font-black text-slate-300 uppercase tracking-widest">Version 30.9</p>
+                <p class="pt-2 text-[10px] font-black text-slate-300 uppercase tracking-widest">Version 31.2</p>
             </div>
         </div>
     </div>
@@ -434,6 +434,8 @@
         let recurringExpenses = JSON.parse(localStorage.getItem('my_recurring_data')) || [];
         let userSalary = JSON.parse(localStorage.getItem('my_salary_data')) || { monthly: 0, yearly: 0 };
         let monthlyBudget = parseFloat(localStorage.getItem('my_budget')) || 0; 
+        
+        // 嚴格使用方案A：只從本地獲取金鑰
         let geminiApiKey = localStorage.getItem('my_gemini_key') || "";
         
         let currentEventId = null;
@@ -532,7 +534,7 @@
             
             const apiKey = geminiApiKey;
             if (!apiKey) {
-                showToast("⚠️ 分析失敗：找不到 AI 金鑰！");
+                showToast("⚠️ 分析失敗：找不到 AI 金鑰，請至設定(⚙️)填寫！");
                 setTimeout(() => toggleDataModal(true), 1500); 
                 return;
             }
@@ -576,9 +578,19 @@
                         
                         const res = await response.json(); 
                         
-                        if (res.error) {
-                            console.error("Gemini API Error:", res.error);
-                            showToast(`API 錯誤: 伺服器拒絕請求 ❌`);
+                        // 智能除錯雷達：將具體錯誤原因顯示出來
+                        if (!response.ok || res.error) {
+                            const errMsg = res.error?.message || `HTTP ${response.status}`;
+                            console.error("Gemini API Error:", res.error || response.statusText);
+                            
+                            // 攔截常見錯誤並給出中文提示
+                            if(errMsg.includes("API key not valid")) {
+                                showToast(`API 錯誤: 金鑰無效，請檢查是否填錯 ❌`);
+                            } else if (errMsg.includes("unsupported")) {
+                                showToast(`API 錯誤: 地區限制，請確認 VPN 已開啟 🌐`);
+                            } else {
+                                showToast(`API 錯誤: ${errMsg} ❌`);
+                            }
                             return;
                         }
                         
@@ -599,8 +611,8 @@
                             throw new Error("無效的資料格式");
                         }
                     } catch (err) { 
-                        console.error("OCR 解析失敗:", err);
-                        showToast("分析失敗，請重新拍攝 ❌"); 
+                        console.error("OCR 解析或網路失敗:", err);
+                        showToast("分析失敗：請檢查網路或 VPN 連線 🌐"); 
                     }
                 };
                 img.src = e.target.result;
