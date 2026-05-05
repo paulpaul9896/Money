@@ -203,13 +203,13 @@
                 <button onclick="handleResetApp()" class="w-full py-3 bg-rose-50 text-rose-600 border border-rose-100 font-black rounded-2xl text-[9px] uppercase tracking-widest active:bg-rose-500 active:text-white transition-all">⚠️ 清空所有本地數據</button>
                 
                 <!-- Gemini API Key 區塊 (方案A) -->
-                <div class="border-t border-slate-100 pt-4 mt-2">
-                    <p class="text-[10px] font-bold text-slate-400 text-left mb-2 ml-1">AI 識圖金鑰 (Gemini API Key)</p>
-                    <input type="password" id="geminiKeyInput" placeholder="在此貼上您的 API Key" class="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-xs font-bold shadow-inner outline-none mb-2 text-center dark:bg-slate-800 dark:border-slate-700 dark:text-white">
-                    <button onclick="saveGeminiKey()" class="w-full py-3 bg-indigo-50 text-indigo-600 font-black rounded-xl text-[10px] uppercase tracking-widest active:scale-95 transition-all dark:bg-indigo-900/50 dark:text-indigo-400">🔑 儲存 AI 金鑰</button>
+                <div class="border-t border-slate-100 pt-4 mt-2 text-left">
+                    <p class="text-[10px] font-bold text-slate-400 mb-2 ml-1 uppercase tracking-tighter">AI 識圖金鑰 (Google Gemini Key)</p>
+                    <input type="password" id="geminiKeyInput" placeholder="在此貼上您的 API Key" class="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-xs font-bold shadow-inner outline-none mb-2 text-center dark:bg-slate-800 dark:border-slate-700 dark:text-white transition-all focus:border-indigo-300">
+                    <button onclick="saveGeminiKey()" class="w-full py-3 bg-indigo-50 text-indigo-600 font-black rounded-xl text-[10px] uppercase tracking-widest active:scale-95 transition-all dark:bg-indigo-900/50 dark:text-indigo-400 shadow-sm">🔑 儲存 AI 金鑰</button>
                 </div>
                 
-                <p class="pt-2 text-[10px] font-black text-slate-300 uppercase tracking-widest">Version 31.2</p>
+                <p class="pt-2 text-[10px] font-black text-slate-300 uppercase tracking-widest">Version 31.3</p>
             </div>
         </div>
     </div>
@@ -280,11 +280,11 @@
                 <div id="calendarDays" class="calendar-grid gap-3"></div>
             </div>
 
-            <!-- 紀錄編輯器 (加入 ID 方便置中跳轉) -->
+            <!-- 紀錄編輯器 -->
             <div id="expenseEditorArea" class="glass-card rounded-[2.8rem] p-8 border-2 border-sky-50 text-left">
                 <div class="flex justify-between items-center mb-4">
                     <h4 class="text-[11px] font-black text-slate-400 uppercase tracking-widest tracking-tighter">紀錄編輯器</h4>
-                    <div class="flex gap-2">
+                    <div class="flex gap-2 text-right">
                         <button onclick="triggerOCR()" class="bg-indigo-500 text-white px-3 py-1.5 rounded-full text-[9px] font-black uppercase shadow-sm active:scale-95 transition-all">📸 AI 識圖</button>
                         <span id="targetDateDisplay" class="bg-sky-500 text-white px-4 py-1.5 rounded-full text-[9px] font-black uppercase shadow-sm">今日</span>
                     </div>
@@ -393,7 +393,7 @@
             <div id="splitHome">
                 <button onclick="showCreateEvent()" class="w-full bg-emerald-600 text-white font-black py-6 rounded-[2rem] shadow-2xl mb-10 text-sm uppercase active:scale-95 transition-all">➕ 建立新分帳計畫</button>
                 <div class="flex gap-2 mb-10">
-                    <input type="text" id="cloudIdInput" placeholder="貼上 ID 或掃描加入計畫" class="flex-[2] px-4 py-3 bg-white border rounded-xl text-xs font-bold shadow-inner">
+                    <input type="text" id="cloudIdInput" placeholder="貼上 ID 或掃描加入計畫" class="flex-[2] px-4 py-3 bg-white border rounded-xl text-xs font-bold shadow-inner text-center">
                     <button onclick="startQRScanner()" class="flex-1 bg-indigo-500 text-white px-2 py-3 rounded-xl text-[14px] font-black uppercase active:scale-95 flex items-center justify-center gap-1">📷 掃描</button>
                     <button onclick="joinCloudEvent()" class="flex-1 bg-emerald-500 text-white px-2 py-3 rounded-xl text-[11px] font-black uppercase active:scale-95">加入</button>
                 </div>
@@ -401,8 +401,8 @@
             </div>
             <div id="createEventSection" class="hidden animate-pop text-left">
                 <div class="glass-card rounded-[2.8rem] p-10 space-y-8 text-center shadow-lg">
-                    <h3 class="font-black text-2xl text-emerald-600 uppercase">計畫設定</h3>
-                    <input type="text" id="newEventName" placeholder="計畫標題" class="w-full px-6 py-5 bg-white border-2 border-slate-50 rounded-[1.5rem] text-sm font-bold text-center shadow-inner">
+                    <h3 class="font-black text-2xl text-emerald-600 uppercase tracking-tighter">新計畫設定</h3>
+                    <input type="text" id="newEventName" placeholder="計畫標題 (如：東京之旅)" class="w-full px-6 py-5 bg-white border-2 border-slate-50 rounded-[1.5rem] text-sm font-bold text-center shadow-inner outline-none">
                     <div id="memberInputsList" class="space-y-4"></div>
                     <button onclick="addMemberInputRow()" class="w-full py-4 border-2 border-dashed border-slate-200 rounded-[1.5rem] text-slate-300 text-[11px] font-black">+ 加入朋友</button>
                     <div class="flex gap-4 pt-4">
@@ -435,7 +435,6 @@
         let userSalary = JSON.parse(localStorage.getItem('my_salary_data')) || { monthly: 0, yearly: 0 };
         let monthlyBudget = parseFloat(localStorage.getItem('my_budget')) || 0; 
         
-        // 嚴格使用方案A：只從本地獲取金鑰
         let geminiApiKey = localStorage.getItem('my_gemini_key') || "";
         
         let currentEventId = null;
@@ -443,11 +442,10 @@
         let calendarDate = new Date();
         let selectedDateStr = new Date().toDateString();
         
-        // 分帳專用日期控制
         let splitCalendarDate = new Date();
         let currentSplitDateStr = new Date().toDateString();
-        let splitViewMode = 'all'; // 'all' 或 'day'
-        let unsubscribeCloud = null; // 雲端即時監聽器
+        let splitViewMode = 'all'; 
+        let unsubscribeCloud = null; 
         
         let currentType = 'expense';
         let sections = {};
@@ -495,7 +493,7 @@
         }
         document.getElementById('confirmOkBtn').onclick = () => closeConfirm(true);
 
-        function showToast(m) { const t = document.getElementById('toast'); if(t) { t.innerText = m; t.classList.add('visible'); setTimeout(() => t.classList.remove('visible'), 2500); } }
+        function showToast(m) { const t = document.getElementById('toast'); if(t) { t.innerText = m; t.classList.add('visible'); setTimeout(() => t.classList.remove('visible'), 3000); } }
         function saveToData() { localStorage.setItem('my_expense_data', JSON.stringify(expenses)); localStorage.setItem('my_split_events', JSON.stringify(splitEvents)); localStorage.setItem('my_recurring_data', JSON.stringify(recurringExpenses)); localStorage.setItem('my_salary_data', JSON.stringify(userSalary)); localStorage.setItem('my_custom_categories', JSON.stringify(customCategories)); localStorage.setItem('my_budget', monthlyBudget.toString()); }
 
         window.setMonthlyBudget = function() {
@@ -508,7 +506,7 @@
             localStorage.setItem('my_gemini_key', geminiApiKey);
             if(geminiApiKey) {
                 document.getElementById('geminiKeyInput').value = "已儲存 ✅";
-                setTimeout(()=> document.getElementById('geminiKeyInput').value = geminiApiKey, 1000);
+                setTimeout(()=> document.getElementById('geminiKeyInput').value = geminiApiKey, 1500);
             }
             showToast("AI 金鑰已儲存！✅");
         }
@@ -517,7 +515,7 @@
             try {
                 const res = await fetch('https://open.er-api.com/v6/latest/HKD'); const data = await res.json();
                 if (data && data.rates) { liveRates.JPY = 1 / data.rates.JPY; liveRates.TWD = 1 / data.rates.TWD; liveRates.USD = 1 / data.rates.USD; liveRates.EUR = 1 / data.rates.EUR; liveRates.CNY = 1 / data.rates.CNY; }
-            } catch (e) { console.warn("無法取得即時匯率，退回安全預設值"); }
+            } catch (e) { console.warn("無法取得即時匯率"); }
         }
 
         function toggleCurrency() { document.getElementById('currencyPanel').classList.toggle('hidden'); }
@@ -534,85 +532,69 @@
             
             const apiKey = geminiApiKey;
             if (!apiKey) {
-                showToast("⚠️ 分析失敗：找不到 AI 金鑰，請至設定(⚙️)填寫！");
+                showToast("⚠️ 請先至設定(⚙️)貼上您的 AI 金鑰！");
                 setTimeout(() => toggleDataModal(true), 1500); 
                 return;
             }
             
-            showToast("📸 正在壓縮並分析圖片..."); 
+            showToast("📸 正在連線 AI 引擎..."); 
             
             const reader = new FileReader();
             reader.onload = function(e) {
                 const img = new Image();
                 img.onload = async function() {
-                    // 使用 Canvas 壓縮圖片，解決 iPhone 照片檔案過大導致的 API 錯誤
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d');
                     const MAX_SIZE = 1024;
-                    let width = img.width;
-                    let height = img.height;
-
-                    if (width > height) {
-                        if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; }
-                    } else {
-                        if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; }
-                    }
-                    
+                    let width = img.width; let height = img.height;
+                    if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } }
                     canvas.width = width; canvas.height = height;
                     ctx.drawImage(img, 0, 0, width, height);
+                    const base64Data = canvas.toDataURL('image/jpeg', 0.6).split(',')[1];
                     
-                    const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
-                    const base64Data = compressedDataUrl.split(',')[1];
-                    
-                    const prompt = `請分析這張收據圖片。提取出總金額、日期、和最可能的類別。如果能看出商店或餐廳名稱，請一併提取。必須輸出合法的 JSON，格式如下：{ "date": "YYYY-MM-DD", "amount": 數字, "category": "類別", "merchant": "商店名稱" }。類別請從[餐飲, 交通, 購物, 娛樂, 醫療, 日常, 其他]中選擇。`;
+                    const prompt = `分析收據圖片。提取出總金額、日期、和最可能的類別。必須輸出合法的 JSON，格式如下：{ "date": "YYYY-MM-DD", "amount": 數字, "category": "類別", "merchant": "商店名稱" }。`;
                     
                     try {
-                        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, { 
+                        // 使用穩定版 v1 接口
+                        const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`, { 
                             method: 'POST', 
                             headers: { 'Content-Type': 'application/json' }, 
                             body: JSON.stringify({ 
-                                contents: [{ parts: [{ text: prompt }, { inlineData: { mimeType: "image/jpeg", data: base64Data } }] }],
-                                generationConfig: { responseMimeType: "application/json" }
+                                contents: [{ parts: [{ text: prompt }, { inlineData: { mimeType: "image/jpeg", data: base64Data } }] }]
                             }) 
                         });
                         
                         const res = await response.json(); 
                         
-                        // 智能除錯雷達：將具體錯誤原因顯示出來
                         if (!response.ok || res.error) {
-                            const errMsg = res.error?.message || `HTTP ${response.status}`;
-                            console.error("Gemini API Error:", res.error || response.statusText);
-                            
-                            // 攔截常見錯誤並給出中文提示
-                            if(errMsg.includes("API key not valid")) {
-                                showToast(`API 錯誤: 金鑰無效，請檢查是否填錯 ❌`);
-                            } else if (errMsg.includes("unsupported")) {
-                                showToast(`API 錯誤: 地區限制，請確認 VPN 已開啟 🌐`);
+                            const errorMsg = res.error?.message || "未知錯誤";
+                            console.error("Gemini Error Detail:", res.error);
+                            if (errorMsg.includes("location") || errorMsg.includes("not supported")) {
+                                showToast(`API 地區限制：請確認美國 VPN 是否生效 🌐`);
+                            } else if (errorMsg.includes("key")) {
+                                showToast(`金鑰無效：請檢查設定中的 Key ❌`);
                             } else {
-                                showToast(`API 錯誤: ${errMsg} ❌`);
+                                showToast(`分析失敗：${errorMsg.substring(0, 30)}... ❌`);
                             }
                             return;
                         }
                         
                         const text = res.candidates?.[0]?.content?.parts?.[0]?.text; 
-                        
-                        if (text) { 
-                            const data = JSON.parse(text); 
+                        const match = text.match(/\{.*\}/s);
+                        if (match) { 
+                            const data = JSON.parse(match[0]); 
                             document.getElementById('amountInput').value = data.amount || ""; 
                             let finalCat = data.category || "其他"; 
-                            if (data.merchant && data.merchant.trim() !== "") { finalCat = `${finalCat} (${data.merchant.trim()})`; } 
+                            if (data.merchant) { finalCat = `${finalCat} (${data.merchant})`; } 
                             document.getElementById('categoryInput').value = finalCat; 
                             if (data.date) { 
                                 let parsedDate = new Date(data.date);
                                 if(!isNaN(parsedDate)) { selectedDateStr = parsedDate.toDateString(); updateTargetDateUI(); }
                             } 
                             showToast("✅ AI 智慧識別成功！"); 
-                        } else {
-                            throw new Error("無效的資料格式");
                         }
                     } catch (err) { 
-                        console.error("OCR 解析或網路失敗:", err);
-                        showToast("分析失敗：請檢查網路或 VPN 連線 🌐"); 
+                        showToast("網路異常：請檢查 VPN 或連線 🌐"); 
                     }
                 };
                 img.src = e.target.result;
@@ -662,7 +644,6 @@
             document.getElementById('addBtn').innerText = "確認修改記錄"; 
             document.getElementById('cancelEditBtn').classList.remove('hidden'); 
             selectedDateStr = i.dateStr; updateTargetDateUI(); renderCalendar(); 
-            
             const editor = document.getElementById('expenseEditorArea');
             if(editor) editor.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
@@ -692,14 +673,13 @@
             document.getElementById('editingRecurringId').value = i.id; 
             document.getElementById('recurringAddBtn').innerText = "確認修改"; 
             document.getElementById('cancelRecurringEditBtn').classList.remove('hidden'); 
-            
             const editor = document.getElementById('recurringEditorArea');
             if(editor) editor.scrollIntoView({ behavior: 'smooth', block: 'center' }); 
         }
         function resetRecurringForm() { document.getElementById('recurringName').value = ''; document.getElementById('recurringAmount').value = ''; document.getElementById('editingRecurringId').value = ''; document.getElementById('recurringDate').valueAsDate = new Date(); document.getElementById('recurringFreq').value = 'monthly'; document.getElementById('recurringAddBtn').innerText = "確認存檔"; document.getElementById('cancelRecurringEditBtn').classList.add('hidden'); }
         function deleteRecurring(id) { askConfirm("刪除定期項目？", "不再同步。", () => { recurringExpenses = recurringExpenses.filter(r => r.id !== id); saveToData(); renderRecurringApp(); renderPersonalApp(); renderCalendar(); }); }
 
-        // --- 5. 分帳助手、掃描與截圖支援 ---
+        // --- 5. 分帳助手與同步 ---
         function showQRModal(id) {
             const m = document.getElementById('qrModal'); const qrContainer = document.getElementById('qrcodeDisplay'); qrContainer.innerHTML = '';
             const joinUrl = window.location.href.split('?')[0] + '?join=' + id; document.getElementById('qrUrlDisplay').innerText = joinUrl;
@@ -712,16 +692,13 @@
             const m = document.getElementById('qrScanModal');
             m.classList.remove('hidden'); m.classList.add('flex'); document.body.classList.add('modal-locked');
             setTimeout(() => m.style.opacity = "1", 10);
-
-            if (!html5QrcodeScanner) {
-                html5QrcodeScanner = new Html5QrcodeScanner("qr-reader", { fps: 10, qrbox: {width: 250, height: 250} }, false);
-            }
+            if (!html5QrcodeScanner) { html5QrcodeScanner = new Html5QrcodeScanner("qr-reader", { fps: 10, qrbox: {width: 250, height: 250} }, false); }
             html5QrcodeScanner.render((decodedText) => {
                 html5QrcodeScanner.clear(); closeQRScanner();
                 let joinId = decodedText; if (joinId.includes('?join=')) { joinId = joinId.split('?join=')[1]; }
                 document.getElementById('cloudIdInput').value = joinId;
                 joinCloudEvent(joinId);
-            }, (err) => { /* ignore */ });
+            }, (err) => {});
         }
         function closeQRScanner() {
             const m = document.getElementById('qrScanModal'); m.style.opacity = "0"; document.body.classList.remove('modal-locked');
@@ -730,20 +707,16 @@
         }
 
         async function handleQRImageUpload(e) {
-            const file = e.target.files[0];
-            if (!file) return;
+            const file = e.target.files[0]; if (!file) return;
             showToast("圖片解析中...");
             try {
                 const html5QrCode = new Html5Qrcode("qr-reader");
                 const decodedText = await html5QrCode.scanFile(file, true);
-                html5QrCode.clear();
-                closeQRScanner();
+                html5QrCode.clear(); closeQRScanner();
                 let joinId = decodedText; if (joinId.includes('?join=')) { joinId = joinId.split('?join=')[1]; }
                 document.getElementById('cloudIdInput').value = joinId;
                 joinCloudEvent(joinId);
-            } catch (err) {
-                showToast("無法辨識這張圖片的 QR Code ❌");
-            }
+            } catch (err) { showToast("無法辨識 QR Code ❌"); }
             e.target.value = ''; 
         }
 
@@ -759,7 +732,6 @@
             showToast(`已套用匯率 ✨`); toggleSplitCurrency();
         }
 
-        // --- 分帳日曆相關邏輯 ---
         window.changeSplitMonth = function(s) { splitCalendarDate.setMonth(splitCalendarDate.getMonth() + s); renderSplitCalendar(); }
         window.setSplitView = function(mode) { splitViewMode = mode; renderSplitCalendar(); renderEventItems(); }
         
@@ -768,48 +740,30 @@
             const c = document.getElementById('splitCalendarDays'); 
             const md = document.getElementById('splitMonthDisplay');
             if(!c || !event) return;
-            
             const y = splitCalendarDate.getFullYear(); const m = splitCalendarDate.getMonth();
             md.innerText = `${y}年 ${m + 1}月`;
-            
             c.innerHTML = ''; const f = new Date(y, m, 1).getDay(); const dInM = new Date(y, m + 1, 0).getDate();
             for (let i = 0; i < f; i++) c.innerHTML += `<div></div>`;
             for (let d = 1; d <= dInM; d++) {
                 const ds = new Date(y, m, d).toDateString(); 
-                
-                let net = (event.items || []).filter(i => {
-                    const itemDate = new Date(i.date).toDateString();
-                    return itemDate === ds;
-                }).reduce((sum, i) => sum + i.amount, 0);
-
+                let net = (event.items || []).filter(i => new Date(i.date).toDateString() === ds).reduce((sum, i) => sum + i.amount, 0);
                 const div = document.createElement('div'); 
                 div.className = `calendar-day hover:bg-emerald-50 ${ds === currentSplitDateStr && splitViewMode === 'day' ? 'split-selected' : ''} ${ds === new Date().toDateString() ? 'split-today' : ''}`;
-                div.onclick = () => { 
-                    currentSplitDateStr = ds; 
-                    splitViewMode = 'day'; 
-                    renderSplitCalendar(); 
-                    renderEventItems(); 
-                };
+                div.onclick = () => { currentSplitDateStr = ds; splitViewMode = 'day'; renderSplitCalendar(); renderEventItems(); };
                 let sumHTML = net !== 0 ? `<span class="text-[7px] font-black mt-0.5 ${ds === currentSplitDateStr && splitViewMode === 'day' ? 'text-white' : 'text-red-500'}">$${Math.round(net)}</span>` : '';
                 div.innerHTML = `<span class="${ds === currentSplitDateStr && splitViewMode === 'day' ? '' : 'text-slate-600'}">${d}</span>${sumHTML}`; 
                 c.appendChild(div);
             }
         }
 
-        function renderEventList() { const l = document.getElementById('eventList'); if(!l) return; l.innerHTML = splitEvents.length === 0 ? '<div class="py-20 text-slate-300 text-xs font-black italic uppercase text-center text-left">No Plans Found</div>' : ''; splitEvents.forEach(e => { const tot = (e.items || []).reduce((s,i) => s + i.amount, 0); const card = document.createElement('div'); card.className = "glass-card p-6 rounded-[2rem] flex justify-between items-center mb-4 border active:scale-95 cursor-pointer text-left"; card.innerHTML = `<div><p class="text-[9px] font-black text-emerald-600 uppercase mb-1">${e.date}${e.isCloud?' (☁️ 雲端同步)':''}</p><h4 class="font-black text-slate-800 text-base tracking-tighter">${e.name}</h4></div><div class="text-right font-black text-lg text-emerald-600">$${tot.toFixed(2)}</div>`; card.onclick = () => openEventDetail(e.id); l.appendChild(card); }); }
+        function renderEventList() { const l = document.getElementById('eventList'); if(!l) return; l.innerHTML = splitEvents.length === 0 ? '<div class="py-20 text-slate-300 text-xs font-black italic uppercase text-center text-left">No Plans Found</div>' : ''; splitEvents.forEach(e => { const tot = (e.items || []).reduce((s,i) => s + i.amount, 0); const card = document.createElement('div'); card.className = "glass-card p-6 rounded-[2rem] flex justify-between items-center mb-4 border active:scale-95 cursor-pointer text-left shadow-sm"; card.innerHTML = `<div><p class="text-[9px] font-black text-emerald-600 uppercase mb-1">${e.date}${e.isCloud?' (☁️ 雲端同步)':''}</p><h4 class="font-black text-slate-800 text-base tracking-tighter">${e.name}</h4></div><div class="text-right font-black text-lg text-emerald-600">$${tot.toFixed(2)}</div>`; card.onclick = () => openEventDetail(e.id); l.appendChild(card); }); }
         
         function openEventDetail(id) { 
             currentEventId = id; const event = splitEvents.find(e => e.id === id); 
             document.getElementById('splitHome').classList.add('hidden'); document.getElementById('eventDetailSection').classList.remove('hidden'); 
-            
             document.getElementById('removeLocalSplitBtn').onclick = window.handleRemoveLocalEventClick;
             const delCloudBtn = document.getElementById('deleteCloudSplitBtn');
-            if(event.isCloud) {
-                delCloudBtn.classList.remove('hidden');
-                delCloudBtn.onclick = window.handleDeleteCloudEventClick;
-            } else {
-                delCloudBtn.classList.add('hidden');
-            }
+            if(event.isCloud) { delCloudBtn.classList.remove('hidden'); delCloudBtn.onclick = window.handleDeleteCloudEventClick; } else { delCloudBtn.classList.add('hidden'); }
             
             if(event.isCloud && window.db && window.isCloudReady) {
                 if(unsubscribeCloud) unsubscribeCloud();
@@ -818,8 +772,7 @@
                         const cloudData = docSnap.data();
                         const idx = splitEvents.findIndex(e => e.id === id);
                         if(idx !== -1 && JSON.stringify(splitEvents[idx].items) !== JSON.stringify(cloudData.items)) {
-                            splitEvents[idx] = cloudData;
-                            saveToData();
+                            splitEvents[idx] = cloudData; saveToData();
                             if(currentEventId === id) { renderSplitCalendar(); renderEventItems(); showToast("🔄 雲端已同步更新"); }
                         }
                     }
@@ -857,62 +810,34 @@
                 </div>
 
                 <div class="glass-card rounded-[2.8rem] p-8 mb-10 text-left text-center">
-                    <div class="flex justify-between items-center mb-6">
-                        <h4 class="font-black text-[10px] text-slate-400 uppercase tracking-widest text-xs italic">新增記帳</h4>
-                    </div>
+                    <h4 class="font-black text-[10px] text-slate-400 uppercase tracking-widest text-xs italic mb-6">新增記帳</h4>
                     <div class="space-y-4 text-center">
                         <input type="text" id="itemDesc" placeholder="消費項目" class="w-full px-5 py-4 bg-white border-2 border-slate-50 rounded-[1.5rem] outline-none text-sm text-center font-bold shadow-inner">
                         <div class="grid grid-cols-2 gap-4 text-center items-start">
                             <div>
-                                <div class="flex justify-between items-center mb-1">
-                                    <label class="block text-[10px] font-black text-slate-400 uppercase ml-1">金額(HKD)</label>
-                                    <button onclick="toggleSplitCurrency()" class="text-[9px] text-sky-500 font-black uppercase underline">🌍 匯率</button>
-                                </div>
+                                <div class="flex justify-between items-center mb-1"><label class="block text-[10px] font-black text-slate-400 uppercase ml-1">金額(HKD)</label><button onclick="toggleSplitCurrency()" class="text-[9px] text-sky-500 font-black uppercase underline">🌍 匯率</button></div>
                                 <input type="number" id="itemAmount" placeholder="$" class="w-full px-5 py-4 bg-white border-2 border-slate-50 rounded-[1.5rem] text-sm text-center font-black shadow-inner">
                                 <div id="splitForeignDisplay" class="text-[9px] text-slate-400 font-bold mt-1 hidden text-center"></div>
                             </div>
                             <div>
-                                <label class="block text-[10px] font-black text-slate-400 uppercase ml-1 mb-1">先付款的人</label>
+                                <label class="block text-[10px] font-black text-slate-400 uppercase ml-1 mb-1">付款人</label>
                                 <select id="itemPayer" class="w-full px-5 py-4 bg-white border-2 border-slate-50 rounded-[1.5rem] text-sm font-bold text-center">${event.members.map(m => `<option value="${m}">${m}</option>`).join('')}</select>
                             </div>
                         </div>
-
-                        <div class="text-left mt-2">
-                            <label class="block text-[10px] font-black text-slate-400 uppercase ml-1 mb-1 text-center">發生日期</label>
-                            <input type="date" id="itemDate" class="w-full px-5 py-4 bg-white border-2 border-slate-50 rounded-[1.5rem] text-sm font-bold text-center shadow-inner outline-none">
-                        </div>
-
-                        <div id="splitCurrencyPanel" class="hidden p-4 bg-emerald-50 rounded-[1.8rem] border border-emerald-100 animate-pop space-y-3 mt-2">
-                            <div class="flex gap-2">
-                                <select id="splitForeignCurrency" class="flex-1 p-2 bg-white border rounded-xl font-bold text-xs"><option value="JPY">JPY</option><option value="TWD">TWD</option><option value="USD">USD</option><option value="EUR">EUR</option><option value="CNY">CNY</option></select>
-                                <input type="number" id="splitForeignAmount" placeholder="外幣金額" class="flex-[2] p-2 bg-white border rounded-xl font-bold text-xs shadow-inner">
-                            </div>
-                            <button onclick="applySplitCurrency()" class="w-full py-2 bg-emerald-500 text-white font-black rounded-xl text-[10px] uppercase shadow-md active:scale-95">轉換</button>
-                        </div>
-
-                        <div id="itemParticipants" class="flex flex-wrap gap-2 justify-center py-2">
-                            ${event.members.map(m => `<label class="flex items-center gap-1 px-3 py-2 bg-slate-50 rounded-xl text-[10px] font-bold border active:scale-95"><input type="checkbox" name="part_check" value="${m}" checked>${m}</label>`).join('')}
-                        </div>
+                        <div class="text-left mt-2"><label class="block text-[10px] font-black text-slate-400 uppercase ml-1 mb-1 text-center">發生日期</label><input type="date" id="itemDate" class="w-full px-5 py-4 bg-white border-2 border-slate-50 rounded-[1.5rem] text-sm font-bold text-center shadow-inner outline-none"></div>
+                        <div id="splitCurrencyPanel" class="hidden p-4 bg-emerald-50 rounded-[1.8rem] border border-emerald-100 animate-pop space-y-3 mt-2"><div class="flex gap-2"><select id="splitForeignCurrency" class="flex-1 p-2 bg-white border rounded-xl font-bold text-xs"><option value="JPY">JPY</option><option value="TWD">TWD</option><option value="USD">USD</option><option value="EUR">EUR</option><option value="CNY">CNY</option></select><input type="number" id="splitForeignAmount" placeholder="外幣金額" class="flex-[2] p-2 bg-white border rounded-xl font-bold text-xs shadow-inner"></div><button onclick="applySplitCurrency()" class="w-full py-2 bg-emerald-500 text-white font-black rounded-xl text-[10px] uppercase shadow-md active:scale-95">轉換</button></div>
+                        <div id="itemParticipants" class="flex flex-wrap gap-2 justify-center py-2">${event.members.map(m => `<label class="flex items-center gap-1 px-3 py-2 bg-slate-50 rounded-xl text-[10px] font-bold border active:scale-95"><input type="checkbox" name="part_check" value="${m}" checked>${m}</label>`).join('')}</div>
                         <button onclick="addItemToEvent()" class="w-full bg-emerald-600 text-white font-black py-5 rounded-[1.5rem] text-xs uppercase shadow-lg active:scale-95 transition-all text-center">確定入帳</button>
                     </div>
                 </div>
-                
-                <div id="eventSettlementWrapper" class="mb-10 text-center relative">
-                    <div id="eventSettlement" class="glass-card rounded-[2.8rem] p-10 border-2 border-emerald-50 text-xs text-center bg-white"></div>
-                    <button onclick="exportSettlementImage()" class="mt-4 px-6 py-3 bg-emerald-50 text-emerald-600 rounded-full text-[10px] font-black uppercase active:scale-95 shadow-sm border border-emerald-100 transition-all">📸 結算清單轉成圖片分享</button>
-                </div>
-
+                <div id="eventSettlementWrapper" class="mb-10 text-center relative"><div id="eventSettlement" class="glass-card rounded-[2.8rem] p-10 border-2 border-emerald-50 text-xs text-center bg-white"></div><button onclick="exportSettlementImage()" class="mt-4 px-6 py-3 bg-emerald-50 text-emerald-600 rounded-full text-[10px] font-black uppercase active:scale-95 shadow-sm border border-emerald-100 transition-all">📸 結算清單轉成圖片分享</button></div>
                 <div id="eventItemsList" class="space-y-4 pb-10"></div>
             `; 
-            
-            document.getElementById('itemDate').valueAsDate = new Date();
-            renderSplitCalendar();
-            renderEventItems(); 
+            document.getElementById('itemDate').valueAsDate = new Date(); renderSplitCalendar(); renderEventItems(); 
         }
 
         window.exportSettlementImage = function() {
-            const node = document.getElementById('eventSettlement');
-            if(!node) return;
+            const node = document.getElementById('eventSettlement'); if(!node) return;
             showToast("📸 正在生成圖片...");
             html2canvas(node, { backgroundColor: "#ffffff", scale: 2, borderRadius: 30 }).then(canvas => {
                 const link = document.createElement('a'); link.download = `分帳結算_${new Date().toISOString().slice(0,10)}.png`; link.href = canvas.toDataURL(); link.click(); showToast("圖片已下載 ✨");
@@ -920,165 +845,64 @@
         }
 
         async function addItemToEvent() {
-            let d = document.getElementById('itemDesc').value.trim() || '共同開支'; 
-            const a = parseFloat(document.getElementById('itemAmount').value); 
-            const p = document.getElementById('itemPayer').value; 
-            const dateVal = document.getElementById('itemDate').value;
-            const pts = Array.from(document.querySelectorAll('input[name="part_check"]:checked')).map(i => i.value);
+            let d = document.getElementById('itemDesc').value.trim() || '共同開支'; const a = parseFloat(document.getElementById('itemAmount').value); const p = document.getElementById('itemPayer').value; const dateVal = document.getElementById('itemDate').value; const pts = Array.from(document.querySelectorAll('input[name="part_check"]:checked')).map(i => i.value);
             if(!a || a <= 0 || pts.length === 0) return showToast("資料不全"); 
-            
             if (splitForeignText) { d += ` (${splitForeignText})`; }
-
-            const event = splitEvents.find(e => e.id === currentEventId); 
-            event.items.unshift({ id: Date.now(), desc: d, amount: a, payer: p, participants: pts, date: dateVal });
-            
-            if(event.isCloud && window.db) {
-                try {
-                    await window.firebaseInitPromise;
-                    if (!window.auth?.currentUser) throw new Error("Auth missing");
-                    await window.setDoc(window.doc(window.db, "artifacts", window.appId, "public", "data", "splitEvents", String(event.id)), event);
-                } catch(e) { console.warn("Cloud update delayed"); }
-            }
-            
-            saveToData(); 
-            splitForeignText = "";
-            const disp = document.getElementById('splitForeignDisplay');
-            if(disp) { disp.innerText = ""; disp.classList.add('hidden'); }
-            
-            renderSplitCalendar();
-            renderEventItems(); 
-            document.getElementById('itemAmount').value = ''; document.getElementById('itemDesc').value = ''; 
-            showToast("已入帳 💰");
+            const event = splitEvents.find(e => e.id === currentEventId); event.items.unshift({ id: Date.now(), desc: d, amount: a, payer: p, participants: pts, date: dateVal });
+            if(event.isCloud && window.db) { try { await window.firebaseInitPromise; await window.setDoc(window.doc(window.db, "artifacts", window.appId, "public", "data", "splitEvents", String(event.id)), event); } catch(e) {} }
+            saveToData(); splitForeignText = ""; renderSplitCalendar(); renderEventItems(); document.getElementById('itemAmount').value = ''; document.getElementById('itemDesc').value = ''; showToast("已入帳 💰");
         }
 
         function renderEventItems() { 
             const event = splitEvents.find(e => e.id === currentEventId); const list = document.getElementById('eventItemsList'); const sett = document.getElementById('eventSettlement'); if(!list || !sett) return; list.innerHTML = ''; 
-            
             let balances = {}; event.members.forEach(m => balances[m] = 0);
-            (event.items || []).forEach(item => {
-                const share = item.amount / item.participants.length; balances[item.payer] += item.amount; item.participants.forEach(p => balances[p] -= share);
-            });
-            
+            (event.items || []).forEach(item => { const share = item.amount / item.participants.length; balances[item.payer] += item.amount; item.participants.forEach(p => balances[p] -= share); });
             let displayItems = event.items || [];
-            if (splitViewMode === 'day') {
-                displayItems = displayItems.filter(i => new Date(i.date).toDateString() === currentSplitDateStr);
-            }
-
-            if (displayItems.length === 0) {
-                list.innerHTML = `<div class="py-10 text-slate-300 text-xs font-black italic uppercase text-center">該日無消費紀錄</div>`;
-            } else {
+            if (splitViewMode === 'day') { displayItems = displayItems.filter(i => new Date(i.date).toDateString() === currentSplitDateStr); }
+            if (displayItems.length === 0) { list.innerHTML = `<div class="py-10 text-slate-300 text-xs font-black italic uppercase text-center">該日無消費紀錄</div>`; } else {
                 displayItems.forEach(item => { 
                     const div = document.createElement('div'); div.className = "bg-white p-6 rounded-[2rem] flex justify-between items-center mb-4 border border-white text-left animate-pop shadow-sm"; 
-                    div.innerHTML = `
-                        <div>
-                            <p class="font-black text-slate-800 text-sm text-left">${item.desc}</p>
-                            <p class="text-[9px] text-slate-400 font-bold uppercase text-left mt-1">
-                                ${item.date ? item.date + ' • ' : ''} 
-                                <span class="bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-lg border border-emerald-100">墊付: ${item.payer}</span>
-                            </p>
-                        </div>
-                        <p class="font-black text-emerald-600 text-right">$${item.amount.toFixed(2)}</p>`; 
+                    div.innerHTML = `<div><p class="font-black text-slate-800 text-sm text-left">${item.desc}</p><p class="text-[9px] text-slate-400 font-bold uppercase text-left mt-1">${item.date ? item.date + ' • ' : ''} <span class="bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-lg border border-emerald-100">墊付: ${item.payer}</span></p></div><p class="font-black text-emerald-600 text-right">$${item.amount.toFixed(2)}</p>`; 
                     list.appendChild(div);
                 });
             }
-            
-            let html = `<h4 class="font-black text-[12px] text-emerald-600 uppercase tracking-widest mb-4 border-b border-emerald-50 pb-2">${event.name} - 總結算</h4>`;
-            html += `<div class="grid grid-cols-2 gap-3 mb-6">`; event.members.forEach(m => { const b = balances[m]; html += `<div class="bg-slate-50 p-4 rounded-2xl text-center shadow-sm"><p class="text-[8px] font-black text-slate-300 uppercase mb-1 text-slate-400 text-left">${m}</p><p class="font-black text-sm ${b >= 0 ? 'text-emerald-500' : 'text-red-500'}">${b >= 0 ? '+' : ''}${b.toFixed(2)}</p></div>`; }); html += `</div>`;
+            let html = `<h4 class="font-black text-[12px] text-emerald-600 uppercase tracking-widest mb-4 border-b border-emerald-50 pb-2">${event.name} - 總結算</h4><div class="grid grid-cols-2 gap-3 mb-6">`;
+            event.members.forEach(m => { const b = balances[m]; html += `<div class="bg-slate-50 p-4 rounded-2xl text-center shadow-sm"><p class="text-[8px] font-black text-slate-300 uppercase mb-1 text-slate-400 text-left">${m}</p><p class="font-black text-sm ${b >= 0 ? 'text-emerald-500' : 'text-red-500'}">${b >= 0 ? '+' : ''}${b.toFixed(2)}</p></div>`; }); html += `</div>`;
             let tempD = [], tempC = []; Object.keys(balances).forEach(m => { if(balances[m] < -0.01) tempD.push({n: m, a: -balances[m]}); else if(balances[m] > 0.01) tempC.push({n: m, a: balances[m]}); }); let i = 0, j = 0; while(i < tempD.length && j < tempC.length) {
                 let pay = Math.min(tempD[i].a, tempC[j].a); html += `<div class="text-[11px] p-4 bg-emerald-50 text-emerald-700 rounded-2xl animate-pop border border-emerald-100/50 mb-2 text-left shadow-sm">💰 <b class="font-black">${tempD[i].n}</b> 應付給 <b class="font-black">${tempC[j].n}</b> $${pay.toFixed(2)}</div>`;
                 tempD[i].a -= pay; tempC[j].a -= pay; if(tempD[i].a <= 0.01) i++; if(tempC[j].a <= 0.01) j++;
             } sett.innerHTML = (tempD.length === 0) ? '<p class="text-slate-300 font-bold py-4 text-center italic uppercase tracking-widest text-xs">All Settled ✨</p>' : html;
-            
             const inner = document.getElementById('eventDetailInner');
             if (inner) {
-                const btnAll = inner.querySelector('button[onclick="setSplitView(\'all\')"]');
-                const btnDay = inner.querySelector('button[onclick="setSplitView(\'day\')"]');
-                if(btnAll && btnDay) {
-                    if (splitViewMode === 'all') {
-                        btnAll.className = "flex-1 py-3 rounded-2xl text-[10px] font-black uppercase bg-emerald-500 text-white border-transparent shadow-sm transition-all";
-                        btnDay.className = "flex-1 py-3 rounded-2xl text-[10px] font-black uppercase bg-white text-slate-400 border shadow-sm transition-all dark:bg-slate-800 dark:border-slate-700";
-                    } else {
-                        btnDay.className = "flex-1 py-3 rounded-2xl text-[10px] font-black uppercase bg-emerald-500 text-white border-transparent shadow-sm transition-all";
-                        btnAll.className = "flex-1 py-3 rounded-2xl text-[10px] font-black uppercase bg-white text-slate-400 border shadow-sm transition-all dark:bg-slate-800 dark:border-slate-700";
-                    }
-                }
+                const btnAll = inner.querySelector('button[onclick="setSplitView(\'all\')"]'); const btnDay = inner.querySelector('button[onclick="setSplitView(\'day\')"]');
+                if(btnAll && btnDay) { if (splitViewMode === 'all') { btnAll.className = "flex-1 py-3 rounded-2xl text-[10px] font-black uppercase bg-emerald-500 text-white border-transparent shadow-sm transition-all"; btnDay.className = "flex-1 py-3 rounded-2xl text-[10px] font-black uppercase bg-white text-slate-400 border shadow-sm transition-all dark:bg-slate-800 dark:border-slate-700"; } else { btnDay.className = "flex-1 py-3 rounded-2xl text-[10px] font-black uppercase bg-emerald-500 text-white border-transparent shadow-sm transition-all"; btnAll.className = "flex-1 py-3 rounded-2xl text-[10px] font-black uppercase bg-white text-slate-400 border shadow-sm transition-all dark:bg-slate-800 dark:border-slate-700"; } }
             }
         }
 
-        function showSplitHome() { 
-            document.getElementById('eventDetailSection').classList.add('hidden'); document.getElementById('splitHome').classList.remove('hidden'); 
-            if(unsubscribeCloud) { unsubscribeCloud(); unsubscribeCloud = null; }
-            renderEventList(); 
-        }
-        
-        window.handleRemoveLocalEventClick = function() { 
-            askConfirm("從本機移除計畫？", "只會刪除您手機上的紀錄。若有雲端 ID 隨時可再加入。", () => { 
-                splitEvents = splitEvents.filter(e => e.id !== currentEventId); 
-                saveToData(); showSplitHome(); showToast("已從本機移除 📱"); 
-            }); 
-        };
-        
-        window.handleDeleteCloudEventClick = function() { 
-            askConfirm("⚠️ 徹底刪除雲端計畫？", "這將從伺服器永久刪除，所有群組成員都會失去此計畫！", async () => { 
-                if(window.db) {
-                    try {
-                        await window.deleteDoc(window.doc(window.db, "artifacts", window.appId, "public", "data", "splitEvents", String(currentEventId)));
-                    } catch(e) { console.error("Cloud delete err:", e); }
-                }
-                splitEvents = splitEvents.filter(e => e.id !== currentEventId); 
-                saveToData(); showSplitHome(); showToast("雲端計畫已徹底刪除 🗑️"); 
-            }); 
-        };
-
+        function showSplitHome() { document.getElementById('eventDetailSection').classList.add('hidden'); document.getElementById('splitHome').classList.remove('hidden'); if(unsubscribeCloud) { unsubscribeCloud(); unsubscribeCloud = null; } renderEventList(); }
+        window.handleRemoveLocalEventClick = function() { askConfirm("從本機移除計畫？", "只會刪除您手機上的紀錄。", () => { splitEvents = splitEvents.filter(e => e.id !== currentEventId); saveToData(); showSplitHome(); showToast("已從本機移除 📱"); }); };
+        window.handleDeleteCloudEventClick = function() { askConfirm("⚠️ 徹底刪除雲端計畫？", "這將從伺服器永久刪除所有資料！", async () => { if(window.db) { try { await window.deleteDoc(window.doc(window.db, "artifacts", window.appId, "public", "data", "splitEvents", String(currentEventId))); } catch(e) {} } splitEvents = splitEvents.filter(e => e.id !== currentEventId); saveToData(); showSplitHome(); showToast("雲端計畫已徹底刪除 🗑️"); }); };
         function showCreateEvent() { document.getElementById('splitHome').classList.add('hidden'); document.getElementById('createEventSection').classList.remove('hidden'); const list = document.getElementById('memberInputsList'); list.innerHTML = ''; addMemberInputRow("我"); addMemberInputRow(); }
         function hideCreateEvent() { document.getElementById('createEventSection').classList.add('hidden'); document.getElementById('splitHome').classList.remove('hidden'); }
-        function addMemberInputRow(v = "") { const d = document.createElement('div'); d.className = "flex items-center gap-3 animate-pop"; d.innerHTML = `<input type="text" class="m-input flex-1 px-5 py-4 bg-white border-2 border-slate-50 rounded-[1.2rem] text-sm font-bold text-center shadow-inner" value="${v}" placeholder="名字"><button onclick="this.parentElement.remove()" class="text-slate-200">✕</button>`; document.getElementById('memberInputsList').appendChild(d); }
-        
+        function addMemberInputRow(v = "") { const d = document.createElement('div'); d.className = "flex items-center gap-3 animate-pop"; d.innerHTML = `<input type="text" class="m-input flex-1 px-5 py-4 bg-white border-2 border-slate-50 rounded-[1.2rem] text-sm font-bold text-center shadow-inner outline-none" value="${v}" placeholder="名字"><button onclick="this.parentElement.remove()" class="text-slate-200 p-2">✕</button>`; document.getElementById('memberInputsList').appendChild(d); }
         async function createNewEvent() { 
             const n = document.getElementById('newEventName').value.trim(); const m = Array.from(document.querySelectorAll('.m-input')).map(i => i.value.trim()).filter(n => n); if (!n || m.length < 2) return showToast("資料不全"); 
             askConfirm("同步至雲端？", "可與朋友共同編輯此計畫。", async () => {
                 const newEvt = { id: Date.now(), name: n, members: m, items: [], date: new Date().toLocaleDateString(), isCloud: true };
-                splitEvents.unshift(newEvt); 
-                if(window.db) {
-                    try {
-                        await window.firebaseInitPromise;
-                        if (!window.auth?.currentUser) throw new Error("Auth missing");
-                        await window.setDoc(window.doc(window.db, "artifacts", window.appId, "public", "data", "splitEvents", String(newEvt.id)), newEvt);
-                    } catch(e) {}
-                }
+                splitEvents.unshift(newEvt); if(window.db) { try { await window.firebaseInitPromise; await window.setDoc(window.doc(window.db, "artifacts", window.appId, "public", "data", "splitEvents", String(newEvt.id)), newEvt); } catch(e) {} }
                 saveToData(); hideCreateEvent(); renderEventList(); 
             });
         }
-
         async function joinCloudEvent(joinId = null) {
-            const id = joinId || document.getElementById('cloudIdInput').value.trim(); 
-            if(!id || !window.db) return showToast("連線中...");
+            const id = joinId || document.getElementById('cloudIdInput').value.trim(); if(!id || !window.db) return showToast("連線中...");
             showToast("正在搜尋計畫 ☁️...");
-            
-            try {
-                await window.firebaseInitPromise;
-                if (!window.auth?.currentUser) throw new Error("Auth missing");
-
-                const docRef = window.doc(window.db, "artifacts", window.appId, "public", "data", "splitEvents", id); 
-                const docSnap = await window.getDoc(docRef);
-                if(docSnap.exists()){ 
-                    const data = docSnap.data(); 
-                    const idx = splitEvents.findIndex(e => e.id === data.id);
-                    if(idx !== -1) { splitEvents[idx] = data; } else { splitEvents.unshift(data); }
-                    saveToData(); renderEventList(); showToast("加入計畫成功！"); 
-                } else {
-                    showToast("找不到該計畫 ❌");
-                }
-            } catch (e) { showToast("讀取失敗 ❌"); }
+            try { await window.firebaseInitPromise; const docRef = window.doc(window.db, "artifacts", window.appId, "public", "data", "splitEvents", id); const docSnap = await window.getDoc(docRef); if(docSnap.exists()){ const data = docSnap.data(); const idx = splitEvents.findIndex(e => e.id === data.id); if(idx !== -1) { splitEvents[idx] = data; } else { splitEvents.unshift(data); } saveToData(); renderEventList(); showToast("加入計畫成功！"); } else { showToast("找不到該計畫 ❌"); } } catch (e) { showToast("讀取失敗 ❌"); }
         }
         function copyId(id) { const el = document.createElement('textarea'); el.value = id; document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el); showToast("ID 已複製 ✨"); }
-
-        // --- 備份與啟動 ---
         function downloadBackupFile() { const b = {}; STORAGE_KEYS.forEach(k => b[k] = localStorage.getItem(k)); const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(b, null, 2)], { type: "application/json" })); a.download = `Backup_${new Date().toISOString().slice(0,10)}.json`; a.click(); }
         function handleFileImport(e) { const f = e.target.files[0]; if(!f) return; const r = new FileReader(); r.onload = function(ev) { try { const d = JSON.parse(ev.target.result); STORAGE_KEYS.forEach(k => { if(d[k]) localStorage.setItem(k, d[k]); }); location.reload(); } catch(err) { showToast("內容無效 ❌"); } }; r.readAsText(f); }
         function exportToCSV() { let csv = "\uFEFF日期,類別/項目,類型,金額\n"; expenses.forEach(e => { csv += `${e.dateStr},${e.category},${e.type === 'income' ? '收入' : '支出'},${e.amount}\n`; }); recurringExpenses.forEach(r => { csv += `${r.date},${r.name},定期支出,${r.amount}\n`; }); const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' })); a.download = `Report_${new Date().toISOString().slice(0,10)}.csv`; a.click(); showToast("CSV 已下載 ✨"); }
         function handleResetApp() { askConfirm("重設 App？", "所有本地數據將被永久清除！", () => { STORAGE_KEYS.forEach(k => localStorage.removeItem(k)); location.reload(); }); }
-
         function startApp() {
             sections = { expense: document.getElementById('sectionExpense'), recurring: document.getElementById('sectionRecurring'), split: document.getElementById('sectionSplit') };
             const ys = document.getElementById('yearSelect'); const ms = document.getElementById('monthSelect'); const curY = new Date().getFullYear();
@@ -1087,35 +911,13 @@
             ys.value = calendarDate.getFullYear(); ms.value = calendarDate.getMonth();
             const mIn = document.getElementById('monthlySalaryInput'); const yIn = document.getElementById('yearlySalaryInput');
             if(mIn) mIn.value = userSalary.monthly || ""; if(yIn) yIn.value = userSalary.yearly || "";
-            updateTargetDateUI(); renderPersonalApp(); renderRecurringApp(); renderEventList(); renderCalendar(); refreshCategoryOptions();
-            fetchExchangeRates();
-
-            const urlParams = new URLSearchParams(window.location.search);
-            const joinId = urlParams.get('join');
-            if (joinId) {
-                window.history.replaceState({}, document.title, window.location.pathname);
-                switchTab('split');
-                document.getElementById('cloudIdInput').value = joinId;
-                setTimeout(() => {
-                    askConfirm("加入計畫？", `偵測到邀請碼 ${joinId}，是否加入此計畫？`, () => {
-                        joinCloudEvent(joinId);
-                    });
-                }, 1000);
-            }
-            
-            if (document.documentElement.classList.contains('dark')) {
-                const icon = document.getElementById('darkModeIcon');
-                if(icon) icon.innerText = '☀️';
-            }
+            const gemIn = document.getElementById('geminiKeyInput'); if(gemIn) gemIn.value = geminiApiKey;
+            updateTargetDateUI(); renderPersonalApp(); renderRecurringApp(); renderEventList(); renderCalendar(); refreshCategoryOptions(); fetchExchangeRates();
+            const urlParams = new URLSearchParams(window.location.search); const joinId = urlParams.get('join');
+            if (joinId) { window.history.replaceState({}, document.title, window.location.pathname); switchTab('split'); document.getElementById('cloudIdInput').value = joinId; setTimeout(() => { askConfirm("加入計畫？", `偵測到邀請碼 ${joinId}`, () => joinCloudEvent(joinId)); }, 1000); }
+            if (document.documentElement.classList.contains('dark')) { const icon = document.getElementById('darkModeIcon'); if(icon) icon.innerText = '☀️'; }
         }
-        
-        window.toggleDarkMode = function() {
-            document.documentElement.classList.toggle('dark');
-            const isDark = document.documentElement.classList.contains('dark');
-            localStorage.setItem('theme', isDark ? 'dark' : 'light');
-            document.getElementById('darkModeIcon').innerText = isDark ? '☀️' : '🌙';
-        }
-
+        window.toggleDarkMode = function() { document.documentElement.classList.toggle('dark'); const isDark = document.documentElement.classList.contains('dark'); localStorage.setItem('theme', isDark ? 'dark' : 'light'); document.getElementById('darkModeIcon').innerText = isDark ? '☀️' : '🌙'; }
         startApp();
     </script>
 </body>
