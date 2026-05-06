@@ -210,7 +210,7 @@
                 
                 <button onclick="window.handleResetApp()" class="w-full py-3 bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-800 font-black rounded-2xl text-[9px] uppercase active:bg-rose-500 active:text-white transition-all mt-4">⚠️ 清空所有本地數據</button>
                 
-                <p class="pt-4 text-center text-[10px] font-black text-slate-300 uppercase tracking-widest">Version 34.3 (分帳修改升級版)</p>
+                <p class="pt-4 text-center text-[10px] font-black text-slate-300 uppercase tracking-widest">Version 34.4 (介面與定期收入優化版)</p>
             </div>
         </div>
     </div>
@@ -329,7 +329,7 @@
         <!-- 2. 年度/定期 -->
         <div id="sectionRecurring" class="hidden animate-pop space-y-8">
             <div class="bg-amber-500 rounded-[2.8rem] p-9 shadow-md text-white relative overflow-hidden text-center">
-                <p class="text-amber-100 text-[11px] font-black uppercase opacity-70 mb-1">年度定期支出總額</p>
+                <p class="text-amber-100 text-[11px] font-black uppercase opacity-70 mb-1">年度定期收支淨額</p>
                 <h2 id="totalRecurring" class="text-5xl font-black tracking-tighter mb-4">$ 0.00</h2>
                 <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 text-left">
                     <div class="flex justify-between items-end">
@@ -349,14 +349,21 @@
             <div id="recurringEditorArea" class="glass-card rounded-[2.8rem] p-8 border-2 border-amber-50 dark:border-slate-800 text-center">
                 <h4 id="recurringTitleLabel" class="text-[11px] font-black text-amber-600 uppercase mb-6 tracking-widest">新增定期項目</h4>
                 <div class="space-y-4">
+                    <!-- 💡 新增：定期項目的收入/支出切換按鈕 -->
+                    <div class="type-toggle dark:bg-slate-800 mb-4">
+                        <button id="recTypeExpBtn" onclick="window.setRecType('expense')" class="type-btn type-expense active font-black dark:text-white">支出 (-)</button>
+                        <button id="recTypeIncBtn" onclick="window.setRecType('income')" class="type-btn type-income font-black dark:text-white">收入 (+)</button>
+                        <div class="type-bg"></div>
+                    </div>
+
                     <input type="text" id="recurringName" placeholder="項目名稱" class="w-full px-5 py-4 bg-white dark:bg-slate-800 border-2 border-slate-50 dark:border-slate-700 rounded-[1.5rem] text-sm text-center font-bold dark:text-white">
                     <div class="flex flex-row space-x-2">
-                        <input type="date" id="recurringDate" class="flex-[3] w-0 min-w-0 px-2 py-4 bg-white dark:bg-slate-800 border-2 border-slate-50 dark:border-slate-700 rounded-[1.2rem] text-xs font-bold dark:text-white outline-none">
-                        <select id="recurringFreq" class="flex-[2] w-0 min-w-0 px-1 py-4 bg-white dark:bg-slate-800 border-2 border-slate-50 dark:border-slate-700 rounded-[1.2rem] text-xs font-black dark:text-white outline-none appearance-none text-center">
+                        <input type="date" id="recurringDate" class="flex-[3] w-0 min-w-0 px-2 py-4 bg-white dark:bg-slate-800 border-2 border-slate-50 dark:border-slate-700 rounded-[1.2rem] text-xs font-bold dark:text-white outline-none box-border">
+                        <select id="recurringFreq" class="flex-[2] w-0 min-w-0 px-1 py-4 bg-white dark:bg-slate-800 border-2 border-slate-50 dark:border-slate-700 rounded-[1.2rem] text-xs font-black dark:text-white outline-none appearance-none text-center box-border">
                             <option value="monthly">每月</option>
                             <option value="yearly">每年</option>
                         </select>
-                        <input type="number" id="recurringAmount" placeholder="費用 $" class="flex-[3] w-0 min-w-0 px-2 py-4 bg-white dark:bg-slate-800 border-2 border-slate-50 dark:border-slate-700 rounded-[1.2rem] text-xs text-center font-black dark:text-white outline-none">
+                        <input type="number" id="recurringAmount" placeholder="費用 $" class="flex-[3] w-0 min-w-0 px-2 py-4 bg-white dark:bg-slate-800 border-2 border-slate-50 dark:border-slate-700 rounded-[1.2rem] text-xs text-center font-black dark:text-white outline-none box-border">
                     </div>
                     <input type="hidden" id="editingRecurringId" value="">
                     <button id="recurringAddBtn" onclick="window.addRecurring()" class="w-full bg-amber-500 text-white font-black py-6 rounded-[1.8rem] text-sm uppercase shadow-md active:scale-95 transition-all">確認存檔</button>
@@ -424,6 +431,7 @@
         window.unsubscribeCloud = null; 
         
         window.currentType = 'expense';
+        window.currentRecType = 'expense'; // 定期項目類別
         window.sections = {};
         window.myChart = null;
         window.confirmAction = null;
@@ -704,10 +712,11 @@
                 let net = window.expenses.filter(e => e.dateStr === ds).reduce((s, i) => s + (i.type === 'income' ? i.amount : -i.amount), 0); 
                 window.recurringExpenses.forEach(r => { 
                     const rd = new Date(r.date); 
+                    const isInc = r.type === 'income';
                     if (r.freq === 'yearly') { 
-                        if (rd.getMonth() === m && rd.getDate() === d && rd.getFullYear() <= y) net -= r.amount; 
+                        if (rd.getMonth() === m && rd.getDate() === d && rd.getFullYear() <= y) net += (isInc ? r.amount : -r.amount); 
                     } else { 
-                        if (rd.getDate() === d && rd <= new Date(y,m,d)) net -= r.amount; 
+                        if (rd.getDate() === d && rd <= new Date(y,m,d)) net += (isInc ? r.amount : -r.amount); 
                     } 
                 }); 
                 const div = document.createElement('div'); 
@@ -748,7 +757,11 @@
                 reportSec.classList.remove('hidden'); 
                 let catSum = {}; 
                 fl.forEach(i => { if(i.type === 'expense') { catSum[i.category] = (catSum[i.category] || 0) + i.amount; totalExp += i.amount; } }); 
-                fr.forEach(r => { const amt = (window.expenseFilter === 'year' && r.freq === 'monthly') ? r.amount * 12 : r.amount; catSum["定期項目"] = (catSum["定期項目"] || 0) + amt; totalExp += amt; }); 
+                fr.forEach(r => { 
+                    const isInc = r.type === 'income';
+                    const amt = (window.expenseFilter === 'year' && r.freq === 'monthly') ? r.amount * 12 : r.amount; 
+                    if (!isInc) { catSum["定期項目"] = (catSum["定期項目"] || 0) + amt; totalExp += amt; }
+                }); 
                 window.updateChart(catSum); 
                 let rHTML = ''; 
                 Object.keys(catSum).forEach(cat => { rHTML += `<div class="flex justify-between items-center text-xs font-bold"><span class="text-slate-400">${cat}</span><span class="text-slate-700 dark:text-slate-200">$${catSum[cat].toLocaleString()}</span></div>`; }); 
@@ -756,7 +769,7 @@
             } else { 
                 reportSec.classList.add('hidden'); 
                 fl.forEach(i => { if(i.type === 'expense') totalExp += i.amount; }); 
-                fr.forEach(r => totalExp += r.amount); 
+                fr.forEach(r => { if(r.type !== 'income') totalExp += r.amount; }); 
             }
             
             fl.forEach(item => { 
@@ -767,9 +780,11 @@
             });
             
             fr.forEach(r => { 
-                const amt = (window.expenseFilter === 'year' && r.freq === 'monthly') ? r.amount * 12 : r.amount; net -= amt; 
-                const div = document.createElement('div'); div.className = "glass-card p-6 rounded-[2rem] flex justify-between items-center bg-amber-50/20"; 
-                div.innerHTML = `<div><p class="font-black text-amber-700 text-sm">🔄 ${r.name}</p><p class="text-[9px] text-amber-400 font-bold uppercase">${r.date}</p></div><div class="text-right"><p class="font-black text-lg text-red-500">-$${amt.toFixed(2)}</p></div>`; 
+                const isInc = r.type === 'income';
+                const amt = (window.expenseFilter === 'year' && r.freq === 'monthly') ? r.amount * 12 : r.amount; 
+                net += isInc ? amt : -amt; 
+                const div = document.createElement('div'); div.className = "glass-card p-6 rounded-[2rem] flex justify-between items-center bg-amber-50/20 dark:bg-slate-800/80 shadow-sm border border-transparent dark:border-slate-700"; 
+                div.innerHTML = `<div><p class="font-black ${isInc?'text-emerald-600 dark:text-emerald-400':'text-amber-700 dark:text-amber-500'} text-sm">🔄 ${r.name}</p><p class="text-[9px] ${isInc?'text-emerald-400 dark:text-emerald-600':'text-amber-400 dark:text-amber-700'} font-bold uppercase mt-1">${r.date} (${r.freq === 'monthly'?'每月':'每年'})</p></div><div class="text-right"><p class="font-black text-lg ${isInc?'text-emerald-500':'text-red-500'}">${isInc?'+':'-'}$${amt.toFixed(2)}</p></div>`; 
                 list.appendChild(div); 
             });
             
@@ -912,6 +927,13 @@
         };
 
         // --- 年度/薪資 ---
+        window.setRecType = function(t) { 
+            window.currentRecType = t; 
+            document.getElementById('recTypeExpBtn').classList.toggle('active', t === 'expense'); 
+            document.getElementById('recTypeIncBtn').classList.toggle('active', t === 'income'); 
+            document.getElementById('recurringAddBtn').innerText = t === 'expense' ? "確認存檔" : "收入存檔"; 
+        };
+
         window.syncSalary = function(t) { 
             const m=document.getElementById('monthlySalaryInput'), y=document.getElementById('yearlySalaryInput'); 
             if(t==='monthly'){
@@ -928,19 +950,29 @@
 
         window.renderRecurringApp = function() { 
             const list = document.getElementById('realRecurringList'); if(!list) return; 
-            let totalAnnual = 0; list.innerHTML = ''; 
+            let totalAnnual = 0; let totalAnnualExpenses = 0; list.innerHTML = ''; 
+            
             window.recurringExpenses.forEach(r => { 
-                const amt = r.freq === 'monthly' ? r.amount * 12 : r.amount; totalAnnual += amt; 
+                const isInc = r.type === 'income';
+                const amt = r.freq === 'monthly' ? r.amount * 12 : r.amount; 
+                if(isInc) totalAnnual += amt; else { totalAnnual -= amt; totalAnnualExpenses += amt; }
+                
                 const row = document.createElement('tr'); row.className = "border-b border-slate-100 dark:border-slate-800 text-[10px]"; 
-                row.innerHTML = `<td class="px-5 py-6 font-bold">${r.name}<br><span class="text-red-500 font-bold">$${r.amount.toFixed(2)} <span class="text-[9px] text-slate-400">(${r.freq === 'monthly'?'每月':'每年'})</span></span></td><td class="px-3 py-6 text-center text-slate-400">${new Date(r.date).toLocaleDateString('zh-HK',{month:'short',day:'numeric'})}</td><td class="px-5 py-6 text-right"><button onclick="window.editRecurring(${r.id})" class="text-sky-500 font-black mr-2">EDIT</button><button onclick="window.deleteRecurring(${r.id})" class="text-red-300 font-black">DEL</button></td>`; 
+                row.innerHTML = `<td class="px-5 py-6 font-bold dark:text-slate-200">${r.name}<br><span class="${isInc?'text-emerald-500':'text-red-500'} font-bold">${isInc?'+':'-'}$${r.amount.toFixed(2)} <span class="text-[9px] text-slate-400">(${r.freq === 'monthly'?'每月':'每年'})</span></span></td><td class="px-3 py-6 text-center text-slate-400">${new Date(r.date).toLocaleDateString('zh-HK',{month:'short',day:'numeric'})}</td><td class="px-5 py-6 text-right"><button onclick="window.editRecurring(${r.id})" class="text-sky-500 font-black mr-2 active:scale-90 transition-all inline-block">EDIT</button><button onclick="window.deleteRecurring(${r.id})" class="text-red-300 font-black active:scale-90 transition-all inline-block">DEL</button></td>`; 
                 list.appendChild(row); 
             }); 
-            document.getElementById('totalRecurring').innerText = `$ ${totalAnnual.toLocaleString()}`; 
+            
+            const totalDisplay = document.getElementById('totalRecurring');
+            totalDisplay.innerText = `${totalAnnual >= 0 ? (totalAnnual > 0 ? '+' : '') : '-'}$ ${Math.abs(totalAnnual).toLocaleString(undefined, {minimumFractionDigits: 2})}`; 
+            if (totalAnnual > 0) totalDisplay.classList.replace('text-white', 'text-emerald-200');
+            else totalDisplay.classList.replace('text-emerald-200', 'text-white');
+
             if(window.userSalary.yearly > 0) { 
-                const p = (totalAnnual / window.userSalary.yearly) * 100; 
+                const p = (totalAnnualExpenses / window.userSalary.yearly) * 100; 
                 document.getElementById('salaryUsageText').innerText = `${p.toFixed(1)}%`; 
                 document.getElementById('salaryUsageBar').style.width = `${Math.min(p, 100)}%`; 
-                document.getElementById('remainingSalaryText').innerText = `剩餘年薪: $ ${(window.userSalary.yearly - totalAnnual).toLocaleString()}`; 
+                const remaining = window.userSalary.yearly + totalAnnual;
+                document.getElementById('remainingSalaryText').innerText = `淨餘額: $ ${remaining.toLocaleString()}`; 
             } else {
                 document.getElementById('salaryUsageText').innerText = `0%`; 
                 document.getElementById('salaryUsageBar').style.width = `0%`; 
@@ -954,12 +986,14 @@
             const a = parseFloat(document.getElementById('recurringAmount').value);
             const f = document.getElementById('recurringFreq').value;
             const eid = document.getElementById('editingRecurringId').value; 
-            if(!n || !d || !a) return; 
+            const type = window.currentRecType;
+            if(!n || !d || !a) return window.showToast("資料不全"); 
+            
             if(eid) { 
                 const idx = window.recurringExpenses.findIndex(r => r.id == eid); 
-                if(idx !== -1) window.recurringExpenses[idx] = {id: Number(eid), name: n, date: d, amount: a, freq: f}; 
+                if(idx !== -1) window.recurringExpenses[idx] = {id: Number(eid), name: n, date: d, amount: a, freq: f, type: type}; 
             } else { 
-                window.recurringExpenses.push({id: Date.now(), name: n, date: d, amount: a, freq: f}); 
+                window.recurringExpenses.push({id: Date.now(), name: n, date: d, amount: a, freq: f, type: type}); 
             } 
             window.saveToData(); window.resetRecurringForm(); window.renderRecurringApp(); window.renderPersonalApp(); window.renderCalendar(); window.showToast("定期項目已同步 ✨"); 
         };
@@ -971,6 +1005,7 @@
             document.getElementById('recurringAmount').value = i.amount; 
             document.getElementById('recurringFreq').value = i.freq || 'monthly'; 
             document.getElementById('editingRecurringId').value = i.id; 
+            window.setRecType(i.type || 'expense');
             document.getElementById('recurringAddBtn').innerText = "確認修改"; 
             document.getElementById('cancelRecurringEditBtn').classList.remove('hidden'); 
             document.getElementById('recurringEditorArea').scrollIntoView({ behavior: 'smooth', block: 'center' }); 
@@ -982,6 +1017,7 @@
             document.getElementById('editingRecurringId').value = ''; 
             document.getElementById('recurringDate').valueAsDate = new Date(); 
             document.getElementById('recurringFreq').value = 'monthly'; 
+            window.setRecType('expense');
             document.getElementById('recurringAddBtn').innerText = "確認存檔"; 
             document.getElementById('cancelRecurringEditBtn').classList.add('hidden'); 
         };
@@ -1188,10 +1224,10 @@
                             <button onclick="window.applySplitCurrency()" class="w-full py-2 bg-emerald-500 text-white font-black rounded-xl text-[10px]">轉換並套用</button> 
                         </div> 
                         
-                        <!-- 💡 修復: 將日期輸入框置中對齊 -->
-                        <div class="text-center mt-2">
-                            <label class="block text-[10px] font-black text-slate-400 mb-1 text-center">發生日期</label>
-                            <input type="date" id="itemDate" class="w-full px-5 py-4 bg-white dark:bg-slate-800 border-2 border-slate-50 dark:border-slate-700 rounded-[1.5rem] text-sm font-bold text-center shadow-inner outline-none">
+                        <!-- 💡 修復: 將日期輸入框置中對齊且不超出視窗 -->
+                        <div class="mt-4 px-2 text-center">
+                            <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">發生日期</label>
+                            <input type="date" id="itemDate" class="w-full h-14 px-4 bg-white dark:bg-slate-800 border-2 border-slate-50 dark:border-slate-700 rounded-[1.2rem] text-sm font-bold text-center shadow-inner outline-none box-border">
                         </div> 
                         
                         <div id="itemParticipants" class="flex flex-wrap gap-2 justify-center py-2">${event.members.map(m => `<label class="flex items-center gap-1 px-3 py-2 bg-slate-50 dark:bg-slate-800 rounded-xl text-[10px] font-bold border"><input type="checkbox" name="part_check" value="${m}" checked>${m}</label>`).join('')}</div> 
