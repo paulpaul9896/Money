@@ -210,7 +210,7 @@
                 
                 <button onclick="window.handleResetApp()" class="w-full py-3 bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-800 font-black rounded-2xl text-[9px] uppercase active:bg-rose-500 active:text-white transition-all mt-4">⚠️ 清空所有本地數據</button>
                 
-                <p class="pt-4 text-center text-[10px] font-black text-slate-300 uppercase tracking-widest">Version 34.2 (細節完美版)</p>
+                <p class="pt-4 text-center text-[10px] font-black text-slate-300 uppercase tracking-widest">Version 34.3 (分帳修改升級版)</p>
             </div>
         </div>
     </div>
@@ -311,7 +311,6 @@
                     </div>
                     <div id="categoryManager" class="hidden p-5 bg-sky-50 dark:bg-slate-900/50 rounded-[1.8rem]"><div id="categoryTagsList" class="flex flex-wrap gap-2 justify-center"></div></div>
                     <input type="hidden" id="editingId" value="">
-                    <!-- 修復: dark:shadow-none 將在 dark mode 完美隱藏原本白色的陰影 -->
                     <button id="addBtn" onclick="window.addExpense()" class="w-full bg-sky-500 text-white font-black py-6 rounded-[1.8rem] text-sm tracking-widest uppercase shadow-xl shadow-sky-200 dark:shadow-none active:scale-95 transition-all">確認存檔</button>
                     <button id="cancelEditBtn" onclick="window.resetForm()" class="w-full bg-slate-100 dark:bg-slate-800 text-slate-400 font-bold py-4 rounded-[1.5rem] text-[10px] uppercase hidden transition-all">取消修改</button>
                 </div>
@@ -351,7 +350,6 @@
                 <h4 id="recurringTitleLabel" class="text-[11px] font-black text-amber-600 uppercase mb-6 tracking-widest">新增定期項目</h4>
                 <div class="space-y-4">
                     <input type="text" id="recurringName" placeholder="項目名稱" class="w-full px-5 py-4 bg-white dark:bg-slate-800 border-2 border-slate-50 dark:border-slate-700 rounded-[1.5rem] text-sm text-center font-bold dark:text-white">
-                    <!-- 修復: 使用 Flex + min-w-0 防止手機版面擠壓重疊 -->
                     <div class="flex flex-row space-x-2">
                         <input type="date" id="recurringDate" class="flex-[3] w-0 min-w-0 px-2 py-4 bg-white dark:bg-slate-800 border-2 border-slate-50 dark:border-slate-700 rounded-[1.2rem] text-xs font-bold dark:text-white outline-none">
                         <select id="recurringFreq" class="flex-[2] w-0 min-w-0 px-1 py-4 bg-white dark:bg-slate-800 border-2 border-slate-50 dark:border-slate-700 rounded-[1.2rem] text-xs font-black dark:text-white outline-none appearance-none text-center">
@@ -361,7 +359,7 @@
                         <input type="number" id="recurringAmount" placeholder="費用 $" class="flex-[3] w-0 min-w-0 px-2 py-4 bg-white dark:bg-slate-800 border-2 border-slate-50 dark:border-slate-700 rounded-[1.2rem] text-xs text-center font-black dark:text-white outline-none">
                     </div>
                     <input type="hidden" id="editingRecurringId" value="">
-                    <button id="recurringAddBtn" onclick="window.addRecurring()" class="w-full bg-amber-500 text-white font-black py-6 rounded-[1.8rem] text-sm uppercase shadow-xl shadow-amber-200 dark:shadow-none active:scale-95 transition-all">確認存檔</button>
+                    <button id="recurringAddBtn" onclick="window.addRecurring()" class="w-full bg-amber-500 text-white font-black py-6 rounded-[1.8rem] text-sm uppercase shadow-md active:scale-95 transition-all">確認存檔</button>
                     <button id="cancelRecurringEditBtn" onclick="window.resetRecurringForm()" class="w-full bg-slate-100 dark:bg-slate-800 text-slate-400 font-bold py-4 rounded-[1.5rem] text-[10px] uppercase hidden">取消修改</button>
                 </div>
             </div>
@@ -1189,9 +1187,20 @@
                             </div> 
                             <button onclick="window.applySplitCurrency()" class="w-full py-2 bg-emerald-500 text-white font-black rounded-xl text-[10px]">轉換並套用</button> 
                         </div> 
-                        <div class="text-left"><label class="block text-[10px] font-black text-slate-400 mb-1">發生日期</label><input type="date" id="itemDate" class="w-full px-5 py-4 bg-white dark:bg-slate-800 border-2 border-slate-50 dark:border-slate-700 rounded-[1.5rem] text-sm font-bold text-center"></div> 
+                        
+                        <!-- 💡 修復: 將日期輸入框置中對齊 -->
+                        <div class="text-center mt-2">
+                            <label class="block text-[10px] font-black text-slate-400 mb-1 text-center">發生日期</label>
+                            <input type="date" id="itemDate" class="w-full px-5 py-4 bg-white dark:bg-slate-800 border-2 border-slate-50 dark:border-slate-700 rounded-[1.5rem] text-sm font-bold text-center shadow-inner outline-none">
+                        </div> 
+                        
                         <div id="itemParticipants" class="flex flex-wrap gap-2 justify-center py-2">${event.members.map(m => `<label class="flex items-center gap-1 px-3 py-2 bg-slate-50 dark:bg-slate-800 rounded-xl text-[10px] font-bold border"><input type="checkbox" name="part_check" value="${m}" checked>${m}</label>`).join('')}</div> 
-                        <button onclick="window.addItemToEvent()" class="w-full bg-emerald-600 text-white font-black py-5 rounded-[1.5rem] text-xs uppercase shadow-md active:scale-95 transition-all">確定入帳</button> 
+                        
+                        <input type="hidden" id="editingSplitItemId" value="">
+                        <div class="flex gap-3 mt-2">
+                            <button id="cancelSplitEditBtn" onclick="window.resetSplitForm()" class="w-full bg-slate-100 dark:bg-slate-800 text-slate-400 font-black py-5 rounded-[1.5rem] text-xs uppercase shadow-sm active:scale-95 transition-all hidden">取消修改</button>
+                            <button id="addSplitBtn" onclick="window.addItemToEvent()" class="w-full bg-emerald-600 text-white font-black py-5 rounded-[1.5rem] text-xs uppercase shadow-md active:scale-95 transition-all text-center">確定入帳</button> 
+                        </div>
                     </div> 
                 </div> 
                 <div id="eventSettlementWrapper" class="mb-10 text-center relative">
@@ -1342,32 +1351,86 @@
             } 
         };
 
+        // 💡 修復: 編輯與新增分帳項目
         window.addItemToEvent = async function() { 
             let d = document.getElementById('itemDesc').value.trim() || '共同開支'; 
             const a = parseFloat(document.getElementById('itemAmount').value);
             const p = document.getElementById('itemPayer').value;
             const dateVal = document.getElementById('itemDate').value;
             const pts = Array.from(document.querySelectorAll('input[name="part_check"]:checked')).map(i => i.value); 
+            const editId = document.getElementById('editingSplitItemId')?.value;
             
             if(!a || a <= 0 || pts.length === 0) return window.showToast("資料不全"); 
             if (window.splitForeignText) d += ` (${window.splitForeignText})`; 
             
             const event = window.splitEvents.find(e => e.id === window.currentEventId); 
-            event.items.unshift({ id: Date.now(), desc: d, amount: a, payer: p, participants: pts, date: dateVal }); 
+            
+            if(editId) {
+                const idx = event.items.findIndex(i => i.id == editId);
+                if(idx !== -1) {
+                    event.items[idx] = { id: Number(editId), desc: d, amount: a, payer: p, participants: pts, date: dateVal };
+                }
+            } else {
+                event.items.unshift({ id: Date.now(), desc: d, amount: a, payer: p, participants: pts, date: dateVal }); 
+            }
             
             if(event.isCloud && window.db) { 
                 try { await window.setDoc(window.doc(window.db, "artifacts", window.appId, "public", "data", "splitEvents", String(event.id)), event); } catch(e) {} 
             } 
             window.saveToData(); 
             window.splitForeignText = ""; 
+            window.resetSplitForm();
             window.renderSplitCalendar(); 
             window.renderEventItems(); 
-            document.getElementById('itemAmount').value = ''; 
-            document.getElementById('itemDesc').value = ''; 
-            window.showToast("已入帳 💰"); 
+            window.showToast(editId ? "已修改紀錄 ✨" : "已入帳 💰"); 
         };
 
-        // --- 修復: 加入分帳項目的刪除按鈕功能 ---
+        // 💡 修復: 重置分帳表單
+        window.resetSplitForm = function() {
+            document.getElementById('itemDesc').value = ''; 
+            document.getElementById('itemAmount').value = ''; 
+            document.getElementById('itemDate').valueAsDate = new Date();
+            
+            const checkboxes = document.querySelectorAll('input[name="part_check"]');
+            checkboxes.forEach(cb => cb.checked = true);
+
+            const editIdField = document.getElementById('editingSplitItemId');
+            if(editIdField) editIdField.value = '';
+            
+            const addBtn = document.getElementById('addSplitBtn');
+            if(addBtn) addBtn.innerText = "確定入帳";
+            
+            const cancelBtn = document.getElementById('cancelSplitEditBtn');
+            if(cancelBtn) cancelBtn.classList.add('hidden');
+            
+            const disp = document.getElementById('splitForeignDisplay');
+            if(disp) { disp.innerText = ""; disp.classList.add('hidden'); }
+        };
+
+        // 💡 修復: 讀取欲修改的分帳項目
+        window.editSplitItem = function(itemId) {
+            const event = window.splitEvents.find(e => e.id === window.currentEventId);
+            if (!event) return;
+            const item = event.items.find(i => i.id === itemId);
+            if (!item) return;
+
+            document.getElementById('itemDesc').value = item.desc;
+            document.getElementById('itemAmount').value = item.amount;
+            document.getElementById('itemPayer').value = item.payer;
+            document.getElementById('itemDate').value = item.date || new Date().toISOString().split('T')[0];
+            
+            const checkboxes = document.querySelectorAll('input[name="part_check"]');
+            checkboxes.forEach(cb => {
+                cb.checked = item.participants.includes(cb.value);
+            });
+
+            document.getElementById('editingSplitItemId').value = item.id;
+            document.getElementById('addSplitBtn').innerText = "確認修改";
+            document.getElementById('cancelSplitEditBtn').classList.remove('hidden');
+
+            document.getElementById('itemDesc').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        };
+
         window.deleteSplitItem = function(itemId) {
             window.askConfirm("刪除此紀錄？", "此操作無法復原。", async () => {
                 const event = window.splitEvents.find(e => e.id === window.currentEventId);
@@ -1402,15 +1465,18 @@
                 displayItems.forEach(item => { 
                     const div = document.createElement('div'); 
                     div.className = "bg-white dark:bg-slate-800 p-6 rounded-[2rem] flex justify-between items-center mb-4 shadow-sm"; 
-                    // 修復: 在這裡加上了刪除按鈕
+                    // 💡 修復: 加上了「修改」與「刪除」按鈕
                     div.innerHTML = `
                         <div class="flex-1 min-w-0">
                             <p class="font-black text-slate-800 dark:text-white text-sm truncate">${item.desc}</p>
                             <p class="text-[9px] text-slate-400 font-bold mt-1 truncate">${item.date || ''} • 墊付: ${item.payer}</p>
                         </div>
-                        <div class="text-right flex flex-col items-end gap-1 ml-2">
+                        <div class="text-right flex flex-col items-end gap-2 ml-2">
                             <p class="font-black text-emerald-600">$${item.amount.toFixed(2)}</p>
-                            <button onclick="window.deleteSplitItem(${item.id})" class="text-red-400 text-[10px] font-black uppercase bg-red-50 dark:bg-red-900/30 px-3 py-1 rounded-lg active:scale-90 transition-all border border-red-100 dark:border-red-800 shadow-sm">刪除</button>
+                            <div class="flex gap-2">
+                                <button onclick="window.editSplitItem(${item.id})" class="text-sky-500 text-[10px] font-black uppercase bg-sky-50 dark:bg-sky-900/30 px-3 py-1 rounded-lg active:scale-90 transition-all border border-sky-100 dark:border-sky-800 shadow-sm">修改</button>
+                                <button onclick="window.deleteSplitItem(${item.id})" class="text-red-400 text-[10px] font-black uppercase bg-red-50 dark:bg-red-900/30 px-3 py-1 rounded-lg active:scale-90 transition-all border border-red-100 dark:border-red-800 shadow-sm">刪除</button>
+                            </div>
                         </div>`; 
                     list.appendChild(div); 
                 }); 
