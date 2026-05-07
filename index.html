@@ -15,10 +15,7 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        // 💡 開啟 Tailwind 的 Class-based 暗黑模式，修復所有 dark: 標籤
-        tailwind.config = {
-            darkMode: 'class',
-        }
+        tailwind.config = { darkMode: 'class', }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -48,25 +45,16 @@
         window.firebaseInitPromise = (async () => {
             let configToUse = YOUR_FIREBASE_CONFIG;
             let isUsingCustomConfig = !!YOUR_FIREBASE_CONFIG;
-            if (!configToUse && typeof __firebase_config !== 'undefined') {
-                configToUse = JSON.parse(__firebase_config);
-                isUsingCustomConfig = false;
-            }
+            if (!configToUse && typeof __firebase_config !== 'undefined') { configToUse = JSON.parse(__firebase_config); isUsingCustomConfig = false; }
             if (configToUse) {
                 try {
                     const app = initializeApp(configToUse);
                     window.auth = getAuth(app);
                     window.db = getFirestore(app);
                     if (!isUsingCustomConfig && typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        try { await signInWithCustomToken(window.auth, __initial_auth_token); } 
-                        catch (err) { await signInAnonymously(window.auth); }
+                        try { await signInWithCustomToken(window.auth, __initial_auth_token); } catch (err) { await signInAnonymously(window.auth); }
                     } else { await signInAnonymously(window.auth); }
-                    onAuthStateChanged(window.auth, (user) => {
-                        if (user) {
-                            window.isCloudReady = true;
-                            if(typeof window.syncAllCloudEvents === 'function') window.syncAllCloudEvents();
-                        }
-                    });
+                    onAuthStateChanged(window.auth, (user) => { if (user) { window.isCloudReady = true; if(typeof window.syncAllCloudEvents === 'function') window.syncAllCloudEvents(); } });
                 } catch (e) { console.error("Firebase fail:", e); }
             }
         })();
@@ -123,14 +111,16 @@
         html.dark .filter-btn { background-color: #1e293b !important; border-color: rgba(255,255,255,0.05) !important; color: #94a3b8 !important; }
         html.dark .filter-btn.active { background-color: #38bdf8 !important; color: #ffffff !important; border-color: #38bdf8 !important; }
         html.dark .tab-btn.active { background-color: #1e293b !important; color: #f8fafc !important; }
-        html.dark #qrScanModal .bg-white, html.dark #qrModal .bg-white { background-color: #1e293b !important; }
-    </style>
-    
-    <script>
-        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
+        
+        /* 💡 全域強制移除暗黑模式下的按鈕彩色陰影 */
+        html.dark .shadow-red-100, 
+        html.dark .shadow-sky-100, 
+        html.dark .shadow-sky-200, 
+        html.dark .shadow-emerald-100, 
+        html.dark .shadow-amber-100 { 
+            box-shadow: none !important; 
         }
-    </script>
+    </style>
 </head>
 <body class="min-h-screen relative text-slate-800 pb-20 transition-colors duration-300">
 
@@ -146,7 +136,7 @@
             <p id="confirmText" class="text-xs text-slate-500 font-bold leading-relaxed">此操作無法撤銷。</p>
             <div class="grid grid-cols-2 gap-3 pt-2">
                 <button onclick="window.closeConfirm(false)" class="py-4 bg-slate-100 dark:bg-slate-800 text-slate-400 font-black rounded-2xl text-[10px] uppercase">取消</button>
-                <button id="confirmOkBtn" onclick="window.closeConfirm(true)" class="py-4 bg-red-500 text-white font-black rounded-2xl text-[10px] uppercase shadow-lg shadow-red-100">確定執行</button>
+                <button id="confirmOkBtn" onclick="window.closeConfirm(true)" class="py-4 bg-red-500 text-white font-black rounded-2xl text-[10px] uppercase shadow-lg shadow-red-100 dark:shadow-none">確定執行</button>
             </div>
         </div>
     </div>
@@ -159,7 +149,7 @@
             <input type="text" id="inputField" placeholder="請在此輸入" class="w-full px-4 py-4 bg-slate-50 dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-2xl text-sm font-bold text-center outline-none focus:border-sky-500 transition-all dark:text-white">
             <div class="grid grid-cols-2 gap-3 pt-2">
                 <button onclick="window.closeInputModal()" class="py-4 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-black rounded-2xl text-[10px] uppercase active:scale-95 transition-all">取消</button>
-                <button id="inputSubmitBtn" onclick="window.submitInputModal()" class="py-4 bg-sky-500 text-white font-black rounded-2xl text-[10px] uppercase shadow-lg shadow-sky-100 active:scale-95 transition-all">確認</button>
+                <button id="inputSubmitBtn" onclick="window.submitInputModal()" class="py-4 bg-sky-500 text-white font-black rounded-2xl text-[10px] uppercase shadow-lg shadow-sky-100 dark:shadow-none active:scale-95 transition-all">確認</button>
             </div>
         </div>
     </div>
@@ -177,7 +167,7 @@
     <!-- 極簡 QR Code 掃描器相機彈窗 -->
     <div id="qrScanModal" class="fixed inset-0 z-[4700] flex items-center justify-center p-6 bg-slate-900/90 backdrop-blur-md hidden opacity-0 transition-opacity duration-300">
         <div class="w-full max-w-sm flex flex-col items-center justify-center space-y-6 animate-pop">
-            <h3 class="font-black text-2xl text-white tracking-widest uppercase">請掃描計畫 QR Code</h3>
+            <h3 class="font-black text-2xl text-white tracking-widest uppercase">請掃描 QR Code</h3>
             <div class="w-full aspect-square bg-black rounded-3xl overflow-hidden shadow-2xl border-4 border-slate-700 relative">
                 <div id="qr-reader" class="w-full h-full"></div>
             </div>
@@ -192,37 +182,32 @@
                 <h3 class="font-black text-xl text-slate-800 dark:text-white">系統與數據管理</h3>
                 <button onclick="window.toggleDataModal(false)" class="text-slate-400 p-2 text-xl">✕</button>
             </div>
-            
             <div class="space-y-4">
                 <div class="bg-sky-50 dark:bg-slate-800/50 p-6 rounded-[2rem] border border-sky-100 dark:border-slate-700 space-y-4">
-                    <p class="text-[10px] font-black text-sky-600 dark:text-sky-400 uppercase tracking-widest text-center">Cloud Backup 雲端備份</p>
+                    <p class="text-[10px] font-black text-sky-600 dark:text-sky-400 uppercase tracking-widest text-center">Cloud Backup</p>
                     <button onclick="window.handleCloudBackup()" class="w-full py-4 bg-sky-500 text-white font-black rounded-2xl shadow-lg shadow-sky-100 dark:shadow-none text-[10px] uppercase active:scale-95 transition-all">☁️ 備份全部資料到雲端</button>
                     <button onclick="window.handleCloudRestore()" class="w-full py-4 bg-white dark:bg-slate-700 text-sky-500 dark:text-sky-300 border border-sky-200 dark:border-slate-600 font-black rounded-2xl text-[10px] uppercase active:scale-95 transition-all">🔄 從雲端還原本機資料</button>
                 </div>
-
                 <div class="grid grid-cols-2 gap-3 mt-4">
                     <button onclick="window.exportToCSV()" class="py-4 bg-emerald-500 text-white font-black rounded-2xl text-[10px] uppercase active:scale-95 transition-all">📊 匯出 CSV</button>
                     <button onclick="window.downloadBackupFile()" class="py-4 bg-slate-800 dark:bg-slate-700 text-white font-black rounded-2xl text-[10px] uppercase active:scale-95 transition-all">💾 下載 JSON</button>
                 </div>
-                
                 <button onclick="document.getElementById('fileInput').click()" class="w-full py-4 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-black rounded-2xl text-[10px] uppercase active:scale-95 transition-all">📂 上載 JSON 還原</button>
                 <input type="file" id="fileInput" class="hidden" accept=".json" onchange="window.handleFileImport(event)">
-                
-                <button onclick="window.handleResetApp()" class="w-full py-3 bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-800 font-black rounded-2xl text-[9px] uppercase active:bg-rose-500 active:text-white transition-all mt-4">⚠️ 清空所有本地數據</button>
-                
-                <p class="pt-4 text-center text-[10px] font-black text-slate-300 uppercase tracking-widest">Version 34.4 (介面與定期收入優化版)</p>
+                <button onclick="window.handleResetApp()" class="w-full py-3 bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-800 font-black rounded-2xl text-[9px] uppercase active:bg-rose-500 active:text-white transition-all mt-4">⚠️ 清空所有數據</button>
+                <p class="pt-4 text-center text-[10px] font-black text-slate-300 uppercase tracking-widest">Version 35.3 (暗黑模式陰影修復版)</p>
             </div>
         </div>
     </div>
 
     <!-- 主內容區 -->
     <div class="max-w-md mx-auto p-5 relative z-10 text-center">
-        <!-- 設置齒輪 -->
+        <!-- 左上齒輪 -->
         <button onclick="window.toggleDataModal(true)" class="fixed top-5 left-5 w-12 h-12 bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg rounded-full shadow-md flex items-center justify-center border border-white dark:border-slate-700 z-[2000] active:scale-90 transition-all">
             <span class="text-2xl">⚙️</span>
         </button>
 
-        <!-- 暗黑模式切換 -->
+        <!-- 右上暗黑切換 -->
         <button onclick="window.toggleDarkMode()" class="fixed top-5 right-5 w-12 h-12 bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg rounded-full shadow-md flex items-center justify-center border border-white dark:border-slate-700 z-[2000] active:scale-90 transition-all">
             <span id="darkModeIcon" class="text-xl">🌙</span>
         </button>
@@ -234,10 +219,12 @@
             <h1 class="text-5xl font-black text-slate-900 dark:text-white tracking-tighter">$$$</h1>
         </header>
 
+        <!-- 💡 導覽列改為四個選項 -->
         <nav class="flex mb-10 bg-slate-200/50 dark:bg-slate-800/50 backdrop-blur-xl rounded-[1.8rem] p-1.5 border border-white/40 dark:border-slate-700 shadow-inner">
-            <button onclick="window.switchTab('expense')" id="tabExpense" class="tab-btn active flex-1 py-4 text-[10px] uppercase font-bold">個人帳本</button>
-            <button onclick="window.switchTab('recurring')" id="tabRecurring" class="tab-btn flex-1 py-4 text-[10px] uppercase font-bold">年度/定期</button>
-            <button onclick="window.switchTab('split')" id="tabSplit" class="tab-btn flex-1 py-4 text-[10px] uppercase font-bold">分帳助手</button>
+            <button onclick="window.switchTab('expense')" id="tabExpense" class="tab-btn active flex-1 py-4 text-[9px] uppercase font-bold">個人帳本</button>
+            <button onclick="window.switchTab('recurring')" id="tabRecurring" class="tab-btn flex-1 py-4 text-[9px] uppercase font-bold">年度定期</button>
+            <button onclick="window.switchTab('split')" id="tabSplit" class="tab-btn flex-1 py-4 text-[9px] uppercase font-bold">分帳助手</button>
+            <button onclick="window.switchTab('currency')" id="tabCurrency" class="tab-btn flex-1 py-4 text-[9px] uppercase font-bold">匯率換算</button>
         </nav>
 
         <!-- 1. 個人帳本 -->
@@ -278,7 +265,6 @@
                 <div id="calendarDays" class="calendar-grid gap-3"></div>
             </div>
 
-            <!-- 紀錄編輯器 -->
             <div id="expenseEditorArea" class="glass-card rounded-[2.8rem] p-8 border-2 border-sky-50 dark:border-slate-800 text-left">
                 <div class="flex justify-between items-center mb-4">
                     <h4 class="text-[11px] font-black text-slate-400 uppercase tracking-widest">紀錄編輯器</h4>
@@ -304,7 +290,7 @@
                     </div>
                     <div id="currencyPanel" class="hidden p-5 bg-sky-50 dark:bg-slate-900/50 rounded-[1.8rem] space-y-4">
                         <div class="flex gap-2">
-                            <select id="foreignCurrency" class="flex-1 p-3 bg-white dark:bg-slate-800 border dark:border-slate-700 rounded-xl font-bold text-xs dark:text-white"><option value="JPY">JPY</option><option value="TWD">TWD</option><option value="USD">USD</option><option value="EUR">EUR</option><option value="CNY">CNY</option></select>
+                            <select id="foreignCurrency" class="flex-1 p-3 bg-white dark:bg-slate-800 border dark:border-slate-700 rounded-xl font-bold text-xs dark:text-white"><option value="JPY">JPY</option><option value="TWD">TWD</option><option value="USD">USD</option><option value="EUR">EUR</option><option value="CNY">CNY</option><option value="GBP">GBP</option></select>
                             <input type="number" id="foreignAmount" placeholder="外幣金額" class="flex-[2] p-3 bg-white dark:bg-slate-800 border dark:border-slate-700 rounded-xl font-bold text-xs dark:text-white">
                         </div>
                         <button onclick="window.applyCurrency()" class="w-full py-3 bg-sky-400 text-white font-black rounded-xl text-[10px] uppercase shadow-md active:scale-95 transition-all">轉換並套用匯率</button>
@@ -339,6 +325,7 @@
                     <div class="w-full bg-black/10 h-1.5 rounded-full mt-3 overflow-hidden"><div id="salaryUsageBar" class="bg-white h-full transition-all duration-1000" style="width: 0%"></div></div>
                 </div>
             </div>
+            
             <div class="glass-card rounded-[2.5rem] p-8 border-2 border-amber-50 dark:border-slate-800 shadow-inner">
                 <h4 class="text-[11px] font-black text-amber-600 uppercase mb-6 text-center tracking-widest">薪資設定</h4>
                 <div class="grid grid-cols-2 gap-4">
@@ -346,24 +333,24 @@
                     <input type="number" id="yearlySalaryInput" oninput="window.syncSalary('yearly')" placeholder="年薪" class="w-full px-5 py-4 bg-white dark:bg-slate-800 border-2 border-slate-50 dark:border-slate-700 rounded-2xl font-bold text-sm text-center dark:text-white">
                 </div>
             </div>
+            
             <div id="recurringEditorArea" class="glass-card rounded-[2.8rem] p-8 border-2 border-amber-50 dark:border-slate-800 text-center">
                 <h4 id="recurringTitleLabel" class="text-[11px] font-black text-amber-600 uppercase mb-6 tracking-widest">新增定期項目</h4>
                 <div class="space-y-4">
-                    <!-- 💡 新增：定期項目的收入/支出切換按鈕 -->
-                    <div class="type-toggle dark:bg-slate-800 mb-4">
+                    <div class="type-toggle dark:bg-slate-800 mb-2">
                         <button id="recTypeExpBtn" onclick="window.setRecType('expense')" class="type-btn type-expense active font-black dark:text-white">支出 (-)</button>
                         <button id="recTypeIncBtn" onclick="window.setRecType('income')" class="type-btn type-income font-black dark:text-white">收入 (+)</button>
                         <div class="type-bg"></div>
                     </div>
-
+                    
                     <input type="text" id="recurringName" placeholder="項目名稱" class="w-full px-5 py-4 bg-white dark:bg-slate-800 border-2 border-slate-50 dark:border-slate-700 rounded-[1.5rem] text-sm text-center font-bold dark:text-white">
                     <div class="flex flex-row space-x-2">
-                        <input type="date" id="recurringDate" class="flex-[3] w-0 min-w-0 px-2 py-4 bg-white dark:bg-slate-800 border-2 border-slate-50 dark:border-slate-700 rounded-[1.2rem] text-xs font-bold dark:text-white outline-none box-border">
-                        <select id="recurringFreq" class="flex-[2] w-0 min-w-0 px-1 py-4 bg-white dark:bg-slate-800 border-2 border-slate-50 dark:border-slate-700 rounded-[1.2rem] text-xs font-black dark:text-white outline-none appearance-none text-center box-border">
+                        <input type="date" id="recurringDate" class="flex-[3] w-0 min-w-0 px-2 h-14 bg-white dark:bg-slate-800 border-2 border-slate-50 dark:border-slate-700 rounded-[1.2rem] text-xs font-bold dark:text-white outline-none box-border">
+                        <select id="recurringFreq" class="flex-[2] w-0 min-w-0 px-1 h-14 bg-white dark:bg-slate-800 border-2 border-slate-50 dark:border-slate-700 rounded-[1.2rem] text-xs font-black dark:text-white outline-none appearance-none text-center box-border">
                             <option value="monthly">每月</option>
                             <option value="yearly">每年</option>
                         </select>
-                        <input type="number" id="recurringAmount" placeholder="費用 $" class="flex-[3] w-0 min-w-0 px-2 py-4 bg-white dark:bg-slate-800 border-2 border-slate-50 dark:border-slate-700 rounded-[1.2rem] text-xs text-center font-black dark:text-white outline-none box-border">
+                        <input type="number" id="recurringAmount" placeholder="費用 $" class="flex-[3] w-0 min-w-0 px-2 h-14 bg-white dark:bg-slate-800 border-2 border-slate-50 dark:border-slate-700 rounded-[1.2rem] text-xs text-center font-black dark:text-white outline-none box-border">
                     </div>
                     <input type="hidden" id="editingRecurringId" value="">
                     <button id="recurringAddBtn" onclick="window.addRecurring()" class="w-full bg-amber-500 text-white font-black py-6 rounded-[1.8rem] text-sm uppercase shadow-md active:scale-95 transition-all">確認存檔</button>
@@ -402,11 +389,45 @@
                 <div class="flex justify-between items-center mb-8 px-2">
                     <button onclick="window.showSplitHome()" class="text-emerald-600 font-black text-[11px] uppercase flex items-center gap-2 active:scale-90 transition-all">← Back</button>
                     <div class="flex gap-3">
-                        <button id="leavePlanBtn" onclick="window.handleLeaveEventClick()" class="text-slate-400 text-[10px] font-black uppercase tracking-widest active:scale-90 transition-all hidden">離開計畫</button>
+                        <button id="leavePlanBtn" onclick="window.handleLeaveEventClick()" class="text-slate-400 text-[10px] font-black uppercase tracking-widest active:scale-90 transition-all hidden">離開</button>
                         <button id="deletePlanBtn" onclick="window.handleDeleteCloudEventClick()" class="text-red-400 text-[10px] font-black uppercase tracking-widest active:scale-90 transition-all hidden">刪除計畫</button>
                     </div>
                 </div>
                 <div id="eventDetailInner"></div>
+            </div>
+        </div>
+
+        <!-- 4. 匯率換算頁面 -->
+        <div id="sectionCurrency" class="hidden animate-pop space-y-8">
+            <div class="glass-card rounded-[2.8rem] p-8 text-center border-2 border-sky-50 dark:border-slate-800">
+                <h4 class="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-6">即時匯率換算</h4>
+                <div class="flex items-center gap-2 mb-6">
+                    <div class="flex-1">
+                        <input type="number" id="currFromAmt" value="1000" class="w-full px-2 py-4 bg-white dark:bg-slate-800 border-2 border-slate-50 dark:border-slate-700 rounded-t-[1rem] text-xl text-center font-black dark:text-white outline-none" oninput="window.calcCurrencyPage()">
+                        <select id="currFrom" class="w-full px-2 py-2 bg-slate-100 dark:bg-slate-700 border-none rounded-b-[1rem] text-xs font-bold text-center dark:text-white outline-none" onchange="window.calcCurrencyPage()">
+                            <option value="JPY" selected>JPY (日圓)</option><option value="USD">USD (美元)</option><option value="TWD">TWD (台幣)</option><option value="EUR">EUR (歐元)</option><option value="CNY">CNY (人民幣)</option><option value="GBP">GBP (英鎊)</option><option value="HKD">HKD (港幣)</option>
+                        </select>
+                    </div>
+                    <div class="font-black text-xl text-slate-300">➡</div>
+                    <div class="flex-1">
+                        <input type="text" id="currToAmt" readonly class="w-full px-2 py-4 bg-slate-50 dark:bg-slate-900 border-2 border-slate-50 dark:border-slate-800 rounded-t-[1rem] text-xl text-center font-black text-sky-500 outline-none">
+                        <select id="currTo" class="w-full px-2 py-2 bg-slate-100 dark:bg-slate-700 border-none rounded-b-[1rem] text-xs font-bold text-center dark:text-white outline-none" onchange="window.calcCurrencyPage()">
+                            <option value="HKD" selected>HKD (港幣)</option><option value="JPY">JPY (日圓)</option><option value="USD">USD (美元)</option><option value="TWD">TWD (台幣)</option><option value="EUR">EUR (歐元)</option><option value="CNY">CNY (人民幣)</option><option value="GBP">GBP (英鎊)</option>
+                        </select>
+                    </div>
+                </div>
+                <p class="text-[9px] text-slate-400 font-bold mb-2">* 匯率即時更新，僅供參考</p>
+            </div>
+
+            <div class="glass-card rounded-[2.8rem] p-8 border-2 border-sky-50 dark:border-slate-800">
+                <h4 class="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-4 text-center">主要貨幣兌港幣匯率</h4>
+                <div class="overflow-hidden rounded-[1.5rem] border border-slate-100 dark:border-slate-700 shadow-sm">
+                    <table class="w-full text-xs text-left">
+                        <tbody id="currencyTableBody" class="divide-y divide-slate-100 dark:divide-slate-700 bg-white dark:bg-slate-800">
+                            <!-- 匯率表自動生成 -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -427,11 +448,12 @@
         window.selectedDateStr = new Date().toDateString();
         window.splitCalendarDate = new Date();
         window.currentSplitDateStr = new Date().toDateString();
+        window.splitDetailTab = 'overview'; 
         window.splitViewMode = 'all'; 
         window.unsubscribeCloud = null; 
         
         window.currentType = 'expense';
-        window.currentRecType = 'expense'; // 定期項目類別
+        window.currentRecType = 'expense';
         window.sections = {};
         window.myChart = null;
         window.confirmAction = null;
@@ -440,1070 +462,381 @@
         window.html5QrCode = null;
         window.inputCallback = null;
         
-        window.liveRates = { JPY: 0.052, TWD: 0.24, USD: 7.82, EUR: 8.4, CNY: 1.08 };
+        // 匯率全域數據
+        window.rawRates = { HKD: 1, USD: 0.128, JPY: 19.5, TWD: 4.1, EUR: 0.118, CNY: 0.92, GBP: 0.1 };
+        window.liveRates = { JPY: 0.052, TWD: 0.24, USD: 7.82, EUR: 8.4, CNY: 1.08 }; 
 
-        // --- 💡 終極自訂輸入框邏輯 ---
+        // --- 自訂輸入框與模態框 ---
         window.showInputModal = function(title, desc, placeholder, defaultVal, type, onOk) {
             const m = document.getElementById('inputModal');
             document.getElementById('inputTitle').innerText = title;
             document.getElementById('inputDesc').innerText = desc;
             const field = document.getElementById('inputField');
-            field.type = type || 'text';
-            field.placeholder = placeholder || '';
-            field.value = defaultVal || '';
+            field.type = type || 'text'; field.placeholder = placeholder || ''; field.value = defaultVal || '';
             window.inputCallback = onOk;
-            
-            m.classList.remove('hidden'); 
-            m.classList.add('flex');
-            document.body.classList.add('modal-locked');
+            m.classList.remove('hidden'); m.classList.add('flex'); document.body.classList.add('modal-locked');
             setTimeout(() => m.style.opacity = "1", 10);
             setTimeout(() => field.focus(), 300);
         };
-
         window.closeInputModal = function() {
-            const m = document.getElementById('inputModal');
-            m.style.opacity = "0";
-            document.body.classList.remove('modal-locked');
+            const m = document.getElementById('inputModal'); m.style.opacity = "0"; document.body.classList.remove('modal-locked');
             setTimeout(() => { m.classList.add('hidden'); m.classList.remove('flex'); }, 300);
         };
-
         window.submitInputModal = function() {
             const val = document.getElementById('inputField').value;
-            window.closeInputModal();
-            if(window.inputCallback) window.inputCallback(val);
+            window.closeInputModal(); if(window.inputCallback) window.inputCallback(val);
         };
 
-        // --- UI 與模態框控制邏輯 ---
-        window.showToast = function(msg) { 
-            const t = document.getElementById('toast'); 
-            if(t) { 
-                t.innerText = msg; 
-                t.classList.add('visible'); 
-                setTimeout(() => t.classList.remove('visible'), 3000); 
-            } 
-        };
-
-        window.askConfirm = function(title, text, onOk) { 
-            const m = document.getElementById('confirmModal'); 
-            document.getElementById('confirmTitle').innerText = title; 
-            document.getElementById('confirmText').innerText = text; 
-            m.classList.remove('hidden'); 
-            m.classList.add('flex'); 
-            document.body.classList.add('modal-locked'); 
-            setTimeout(() => m.style.opacity = "1", 10); 
-            window.confirmAction = onOk; 
-        };
-
-        window.closeConfirm = function(executed) { 
-            const m = document.getElementById('confirmModal'); 
-            m.style.opacity = "0"; 
-            document.body.classList.remove('modal-locked'); 
-            setTimeout(() => { m.classList.add('hidden'); m.classList.remove('flex'); }, 300); 
-            if(executed && window.confirmAction) {
-                window.confirmAction(); 
-            }
-            window.confirmAction = null; 
-        };
-
-        window.toggleDataModal = function(show) { 
-            const m = document.getElementById('dataModal'); 
-            if(show) { 
-                m.classList.remove('hidden'); 
-                m.classList.add('flex'); 
-                setTimeout(() => m.style.opacity = "1", 10); 
-            } else { 
-                m.style.opacity = "0"; 
-                setTimeout(() => { m.classList.add('hidden'); m.classList.remove('flex'); }, 300); 
-            } 
-        };
-
+        window.showToast = function(msg) { const t = document.getElementById('toast'); if(t) { t.innerText = msg; t.classList.add('visible'); setTimeout(() => t.classList.remove('visible'), 3000); } };
+        window.askConfirm = function(title, text, onOk) { const m = document.getElementById('confirmModal'); document.getElementById('confirmTitle').innerText = title; document.getElementById('confirmText').innerText = text; m.classList.remove('hidden'); m.classList.add('flex'); document.body.classList.add('modal-locked'); setTimeout(() => m.style.opacity = "1", 10); window.confirmAction = onOk; };
+        window.closeConfirm = function(executed) { const m = document.getElementById('confirmModal'); m.style.opacity = "0"; document.body.classList.remove('modal-locked'); setTimeout(() => { m.classList.add('hidden'); m.classList.remove('flex'); }, 300); if(executed && window.confirmAction) window.confirmAction(); window.confirmAction = null; };
+        window.toggleDataModal = function(show) { const m = document.getElementById('dataModal'); if(show) { m.classList.remove('hidden'); m.classList.add('flex'); setTimeout(() => m.style.opacity = "1", 10); } else { m.style.opacity = "0"; setTimeout(() => { m.classList.add('hidden'); m.classList.remove('flex'); }, 300); } };
+        
         window.switchTab = function(mode) { 
-            Object.keys(window.sections).forEach(k => { 
-                if(window.sections[k]) window.sections[k].classList.add('hidden'); 
-            }); 
-            document.querySelectorAll('.tab-btn').forEach(b => { 
-                b.classList.remove('active'); 
-                b.classList.add('text-slate-400'); 
-                b.style.background="transparent"; 
-            }); 
+            Object.keys(window.sections).forEach(k => { if(window.sections[k]) window.sections[k].classList.add('hidden'); }); 
+            document.querySelectorAll('.tab-btn').forEach(b => { b.classList.remove('active'); b.classList.add('text-slate-400'); b.style.background="transparent"; }); 
             const btn = document.getElementById('tab' + mode.charAt(0).toUpperCase() + mode.slice(1)); 
-            if(btn) { 
-                btn.classList.add('active'); 
-                btn.classList.remove('text-slate-400'); 
-            } 
+            if(btn) { btn.classList.add('active'); btn.classList.remove('text-slate-400'); } 
             if(window.sections[mode]) window.sections[mode].classList.remove('hidden'); 
         };
-
-        window.toggleDarkMode = function() { 
-            document.documentElement.classList.toggle('dark'); 
-            const isDark = document.documentElement.classList.contains('dark'); 
-            localStorage.setItem('theme', isDark ? 'dark' : 'light'); 
-            document.getElementById('darkModeIcon').innerText = isDark ? '☀️' : '🌙'; 
-        };
-
-        // --- 全機備份邏輯 ---
-        window.saveToData = function() { 
-            localStorage.setItem('my_expense_data', JSON.stringify(window.expenses)); 
-            localStorage.setItem('my_split_events', JSON.stringify(window.splitEvents)); 
-            localStorage.setItem('my_recurring_data', JSON.stringify(window.recurringExpenses)); 
-            localStorage.setItem('my_salary_data', JSON.stringify(window.userSalary)); 
-            localStorage.setItem('my_custom_categories', JSON.stringify(window.customCategories)); 
-            localStorage.setItem('my_budget', window.monthlyBudget.toString()); 
-        };
-
-        window.handleCloudBackup = async function() {
-            if(!window.isCloudReady) return window.showToast("雲端尚未就緒 ☁️");
-            window.toggleDataModal(false);
-            const oldPwd = localStorage.getItem('my_last_backup_pwd') || "";
-            
-            window.showInputModal("雲端備份", "請設定「備份密碼」\n(相同密碼自動覆蓋，新密碼自動刪除舊檔)", "例如: backup123", oldPwd, "text", async (pwd) => {
-                if(!pwd || pwd.trim().length < 4) return window.showToast("代碼過短，備份取消");
-                window.showToast("正在上傳並清理雲端...");
-                const fullPackage = { id: pwd.trim(), timestamp: Date.now(), data: {} };
-                STORAGE_KEYS.forEach(key => fullPackage.data[key] = localStorage.getItem(key));
-                try {
-                    if (oldPwd && oldPwd !== pwd.trim()) {
-                        try { await window.deleteDoc(window.doc(window.db, "artifacts", window.appId, "public", "data", "fullBackups", oldPwd)); } 
-                        catch(err) { /* 忽略刪除失敗 */ }
-                    }
-                    await window.setDoc(window.doc(window.db, "artifacts", window.appId, "public", "data", "fullBackups", pwd.trim()), fullPackage);
-                    localStorage.setItem('my_last_backup_pwd', pwd.trim());
-                    window.showToast("✅ 備份成功！已覆蓋/更新雲端檔");
-                } catch(e) { window.showToast("❌ 備份失敗，請稍後再試"); }
-            });
-        };
-
-        window.handleCloudRestore = async function() {
-            if(!window.isCloudReady) return window.showToast("雲端尚未就緒 ☁️");
-            window.toggleDataModal(false);
-            const oldPwd = localStorage.getItem('my_last_backup_pwd') || "";
-            
-            window.showInputModal("雲端還原", "請輸入您之前設定的「備份代碼」", "例如: backup123", oldPwd, "text", async (pwd) => {
-                if(!pwd) return;
-                window.showToast("正在搜尋備份...");
-                try {
-                    const docRef = window.doc(window.db, "artifacts", window.appId, "public", "data", "fullBackups", pwd.trim());
-                    const docSnap = await window.getDoc(docRef);
-                    if(docSnap.exists()) {
-                        const pkg = docSnap.data().data;
-                        window.askConfirm("發現備份！", "還原將覆蓋手機目前的資料，確定嗎？", () => {
-                            Object.keys(pkg).forEach(key => { if(pkg[key]) localStorage.setItem(key, pkg[key]); });
-                            localStorage.setItem('my_last_backup_pwd', pwd.trim());
-                            window.showToast("✅ 資料還原成功！即將重新載入...");
-                            setTimeout(() => location.reload(), 1500);
-                        });
-                    } else { window.showToast("❌ 找不到該代碼的備份資料"); }
-                } catch(e) { window.showToast("❌ 讀取失敗"); }
-            });
-        };
-
-        window.downloadBackupFile = function() { 
-            const b = {}; STORAGE_KEYS.forEach(k => b[k] = localStorage.getItem(k)); 
-            const a = document.createElement('a'); 
-            a.href = URL.createObjectURL(new Blob([JSON.stringify(b, null, 2)], { type: "application/json" })); 
-            a.download = `Backup_${new Date().toISOString().slice(0,10)}.json`; 
-            a.click(); 
-        };
-
-        window.handleFileImport = function(e) { 
-            const f = e.target.files[0]; if(!f) return; 
-            const r = new FileReader(); 
-            r.onload = function(ev) { 
-                try { 
-                    const d = JSON.parse(ev.target.result); 
-                    STORAGE_KEYS.forEach(k => { if(d[k]) localStorage.setItem(k, d[k]); }); 
-                    window.showToast("✅ 資料還原成功，正在重新載入...");
-                    setTimeout(() => location.reload(), 1000); 
-                } catch(err) { window.showToast("無效檔案 ❌"); } 
-            }; 
-            r.readAsText(f); 
-        };
-
-        window.exportToCSV = function() { 
-            let csv = "\uFEFF日期,類別,金額,外幣\n"; 
-            window.expenses.forEach(e => { csv += `${e.dateStr},${e.category},${e.amount},${e.foreignText||''}\n`; }); 
-            const a = document.createElement('a'); 
-            a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); 
-            a.download = `Report_${new Date().toISOString().slice(0,10)}.csv`; 
-            a.click(); 
-        };
-
-        window.handleResetApp = function() { 
-            window.askConfirm("重設 App？", "所有數據將被清除！", () => { 
-                STORAGE_KEYS.forEach(k => localStorage.removeItem(k)); 
-                location.reload(); 
-            }); 
-        };
-
-        // --- 個人帳本邏輯 ---
-        window.updateTargetDateUI = function() { 
-            const t = document.getElementById('targetDateDisplay'); 
-            if(t) t.innerText = new Date(window.selectedDateStr).toLocaleDateString('zh-HK',{month:'short',day:'numeric'}); 
-        };
-
-        window.changeMonth = function(s) { 
-            window.calendarDate.setMonth(window.calendarDate.getMonth() + s); 
-            window.renderCalendar();
-            window.renderPersonalApp(); 
-        };
-
-        window.jumpToDate = function() { 
-            window.calendarDate.setFullYear(parseInt(document.getElementById('yearSelect').value)); 
-            window.calendarDate.setMonth(parseInt(document.getElementById('monthSelect').value)); 
-            window.renderCalendar(); 
-            window.renderPersonalApp(); 
-        };
-
-        window.setMonthlyBudget = function() { 
-            window.showInputModal("設定預算", "請輸入您的每月預算 (HKD):", "輸入金額", window.monthlyBudget || "", "number", (val) => {
-                if(val !== null && val !== "" && !isNaN(val)) { 
-                    window.monthlyBudget = parseFloat(val) || 0; 
-                    window.saveToData(); 
-                    window.renderPersonalApp(); 
-                    window.showToast("預算已更新 🎯"); 
-                } 
-            });
-        };
-
+        window.toggleDarkMode = function() { document.documentElement.classList.toggle('dark'); const isDark = document.documentElement.classList.contains('dark'); localStorage.setItem('theme', isDark ? 'dark' : 'light'); document.getElementById('darkModeIcon').innerText = isDark ? '☀️' : '🌙'; };
+        
+        // --- 匯率換算邏輯 ---
         window.fetchExchangeRates = async function() { 
             try { 
                 const res = await fetch('https://open.er-api.com/v6/latest/HKD'); 
                 const data = await res.json(); 
                 if (data && data.rates) { 
+                    window.rawRates = data.rates;
                     window.liveRates.JPY = 1 / data.rates.JPY; 
                     window.liveRates.TWD = 1 / data.rates.TWD; 
                     window.liveRates.USD = 1 / data.rates.USD; 
                     window.liveRates.EUR = 1 / data.rates.EUR; 
                     window.liveRates.CNY = 1 / data.rates.CNY; 
                 } 
-            } catch (e) { console.warn("無法取得即時匯率"); } 
+            } catch (e) { console.warn("無法取得即時匯率"); }
+            window.renderCurrencyTable();
+            window.calcCurrencyPage();
         };
 
+        window.calcCurrencyPage = function() {
+            const from = document.getElementById('currFrom').value;
+            const to = document.getElementById('currTo').value;
+            const amt = parseFloat(document.getElementById('currFromAmt').value) || 0;
+            if(!window.rawRates[from] || !window.rawRates[to]) return;
+            const inHKD = amt / window.rawRates[from];
+            const result = inHKD * window.rawRates[to];
+            document.getElementById('currToAmt').value = result.toFixed(2);
+        };
+
+        window.renderCurrencyTable = function() {
+            const tbody = document.getElementById('currencyTableBody');
+            if(!tbody) return;
+            
+            const currencies = [
+                { c: 'USD', label: '1 USD (美元)', mult: 1 },
+                { c: 'JPY', label: '100 JPY (日圓)', mult: 100 },
+                { c: 'CNY', label: '1 CNY (人民幣)', mult: 1 },
+                { c: 'GBP', label: '1 GBP (英鎊)', mult: 1 },
+                { c: 'EUR', label: '1 EUR (歐元)', mult: 1 },
+                { c: 'TWD', label: '100 TWD (台幣)', mult: 100 },
+                { c: 'KRW', label: '1000 KRW (韓圜)', mult: 1000 },
+                { c: 'AUD', label: '1 AUD (澳幣)', mult: 1 }
+            ];
+            
+            let html = '';
+            currencies.forEach(item => {
+                if(window.rawRates[item.c]) {
+                    const hkdValue = (item.mult / window.rawRates[item.c]).toFixed(3);
+                    html += `<tr><td class="px-5 py-4 font-bold dark:text-slate-200">${item.label}</td><td class="px-5 py-4 text-right font-black text-sky-500">${hkdValue} HKD</td></tr>`;
+                }
+            });
+            tbody.innerHTML = html;
+        };
+
+        // --- 全機備份邏輯 ---
+        window.saveToData = function() { localStorage.setItem('my_expense_data', JSON.stringify(window.expenses)); localStorage.setItem('my_split_events', JSON.stringify(window.splitEvents)); localStorage.setItem('my_recurring_data', JSON.stringify(window.recurringExpenses)); localStorage.setItem('my_salary_data', JSON.stringify(window.userSalary)); localStorage.setItem('my_custom_categories', JSON.stringify(window.customCategories)); localStorage.setItem('my_budget', window.monthlyBudget.toString()); };
+        window.handleCloudBackup = async function() { if(!window.isCloudReady) return window.showToast("雲端尚未就緒 ☁️"); window.toggleDataModal(false); const oldPwd = localStorage.getItem('my_last_backup_pwd') || ""; window.showInputModal("雲端備份", "請設定「備份密碼」\n(相同密碼自動覆蓋，新密碼自動刪除舊檔)", "例如: backup123", oldPwd, "text", async (pwd) => { if(!pwd || pwd.trim().length < 4) return window.showToast("代碼過短，備份取消"); window.showToast("正在上傳並清理雲端..."); const fullPackage = { id: pwd.trim(), timestamp: Date.now(), data: {} }; STORAGE_KEYS.forEach(key => fullPackage.data[key] = localStorage.getItem(key)); try { if (oldPwd && oldPwd !== pwd.trim()) { try { await window.deleteDoc(window.doc(window.db, "artifacts", window.appId, "public", "data", "fullBackups", oldPwd)); } catch(err) {} } await window.setDoc(window.doc(window.db, "artifacts", window.appId, "public", "data", "fullBackups", pwd.trim()), fullPackage); localStorage.setItem('my_last_backup_pwd', pwd.trim()); window.showToast("✅ 備份成功！已覆蓋/更新雲端檔"); } catch(e) { window.showToast("❌ 備份失敗，請稍後再試"); } }); };
+        window.handleCloudRestore = async function() { if(!window.isCloudReady) return window.showToast("雲端尚未就緒 ☁️"); window.toggleDataModal(false); const oldPwd = localStorage.getItem('my_last_backup_pwd') || ""; window.showInputModal("雲端還原", "請輸入您之前設定的「備份代碼」", "例如: backup123", oldPwd, "text", async (pwd) => { if(!pwd) return; window.showToast("正在搜尋備份..."); try { const docRef = window.doc(window.db, "artifacts", window.appId, "public", "data", "fullBackups", pwd.trim()); const docSnap = await window.getDoc(docRef); if(docSnap.exists()) { const pkg = docSnap.data().data; window.askConfirm("發現備份！", "還原將覆蓋手機目前的資料，確定嗎？", () => { Object.keys(pkg).forEach(key => { if(pkg[key]) localStorage.setItem(key, pkg[key]); }); localStorage.setItem('my_last_backup_pwd', pwd.trim()); window.showToast("✅ 資料還原成功！即將重新載入..."); setTimeout(() => location.reload(), 1500); }); } else { window.showToast("❌ 找不到該代碼的備份資料"); } } catch(e) { window.showToast("❌ 讀取失敗"); } }); };
+        window.downloadBackupFile = function() { const b = {}; STORAGE_KEYS.forEach(k => b[k] = localStorage.getItem(k)); const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(b, null, 2)], { type: "application/json" })); a.download = `Backup_${new Date().toISOString().slice(0,10)}.json`; a.click(); };
+        window.handleFileImport = function(e) { const f = e.target.files[0]; if(!f) return; const r = new FileReader(); r.onload = function(ev) { try { const d = JSON.parse(ev.target.result); STORAGE_KEYS.forEach(k => { if(d[k]) localStorage.setItem(k, d[k]); }); window.showToast("✅ 資料還原成功，正在重新載入..."); setTimeout(() => location.reload(), 1000); } catch(err) { window.showToast("無效檔案 ❌"); } }; r.readAsText(f); };
+        window.exportToCSV = function() { let csv = "\uFEFF日期,類別,金額,外幣\n"; window.expenses.forEach(e => { csv += `${e.dateStr},${e.category},${e.amount},${e.foreignText||''}\n`; }); const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); a.download = `Report_${new Date().toISOString().slice(0,10)}.csv`; a.click(); };
+        window.handleResetApp = function() { window.askConfirm("重設 App？", "所有數據將被清除！", () => { STORAGE_KEYS.forEach(k => localStorage.removeItem(k)); location.reload(); }); };
+
+        // --- 個人帳本邏輯 ---
+        window.updateTargetDateUI = function() { const t = document.getElementById('targetDateDisplay'); if(t) t.innerText = new Date(window.selectedDateStr).toLocaleDateString('zh-HK',{month:'short',day:'numeric'}); };
+        window.changeMonth = function(s) { window.calendarDate.setMonth(window.calendarDate.getMonth() + s); window.renderCalendar(); window.renderPersonalApp(); };
+        window.jumpToDate = function() { window.calendarDate.setFullYear(parseInt(document.getElementById('yearSelect').value)); window.calendarDate.setMonth(parseInt(document.getElementById('monthSelect').value)); window.renderCalendar(); window.renderPersonalApp(); };
+        window.setMonthlyBudget = function() { window.showInputModal("設定預算", "請輸入您的每月預算 (HKD):", "輸入金額", window.monthlyBudget || "", "number", (val) => { if(val !== null && val !== "" && !isNaN(val)) { window.monthlyBudget = parseFloat(val) || 0; window.saveToData(); window.renderPersonalApp(); window.showToast("預算已更新 🎯"); } }); };
         window.toggleCurrency = function() { document.getElementById('currencyPanel').classList.toggle('hidden'); };
-        
-        window.applyCurrency = function() { 
-            const cur = document.getElementById('foreignCurrency').value;
-            const amt = parseFloat(document.getElementById('foreignAmount').value); 
-            if (!amt) return window.showToast("請輸入金額"); 
-            const hkd = (amt * (window.liveRates[cur] || 1)).toFixed(2); 
-            document.getElementById('amountInput').value = hkd; 
-            window.personalForeignText = `${cur} ${amt}`; 
-            const disp = document.getElementById('foreignDisplay'); 
-            if(disp) { 
-                disp.innerText = `約 HKD $${hkd} (${window.personalForeignText})`; 
-                disp.classList.remove('hidden'); 
-            } 
-            window.showToast(`已套用匯率 ✨`); 
-            window.toggleCurrency(); 
-        };
+        window.applyCurrency = function() { const cur = document.getElementById('foreignCurrency').value, amt = parseFloat(document.getElementById('foreignAmount').value); if (!amt) return window.showToast("請輸入金額"); const hkd = (amt * (window.liveRates[cur] || 1)).toFixed(2); document.getElementById('amountInput').value = hkd; window.personalForeignText = `${cur} ${amt}`; const disp = document.getElementById('foreignDisplay'); if(disp) { disp.innerText = `約 HKD $${hkd} (${window.personalForeignText})`; disp.classList.remove('hidden'); } window.showToast(`已套用匯率 ✨`); window.toggleCurrency(); };
 
-        window.renderCalendar = function() { 
-            const c = document.getElementById('calendarDays'); if(!c) return; 
-            const y = window.calendarDate.getFullYear(), m = window.calendarDate.getMonth(); 
-            document.getElementById('yearSelect').value = y; 
-            document.getElementById('monthSelect').value = m; 
-            c.innerHTML = ''; 
-            const f = new Date(y, m, 1).getDay(), dInM = new Date(y, m + 1, 0).getDate(); 
-            
-            for (let i = 0; i < f; i++) c.innerHTML += `<div></div>`; 
-            
-            for (let d = 1; d <= dInM; d++) { 
-                const ds = new Date(y, m, d).toDateString(); 
-                let net = window.expenses.filter(e => e.dateStr === ds).reduce((s, i) => s + (i.type === 'income' ? i.amount : -i.amount), 0); 
-                window.recurringExpenses.forEach(r => { 
-                    const rd = new Date(r.date); 
-                    const isInc = r.type === 'income';
-                    if (r.freq === 'yearly') { 
-                        if (rd.getMonth() === m && rd.getDate() === d && rd.getFullYear() <= y) net += (isInc ? r.amount : -r.amount); 
-                    } else { 
-                        if (rd.getDate() === d && rd <= new Date(y,m,d)) net += (isInc ? r.amount : -r.amount); 
-                    } 
-                }); 
-                const div = document.createElement('div'); 
-                div.className = `calendar-day hover:bg-sky-50 dark:hover:bg-slate-800 ${ds === window.selectedDateStr ? 'selected' : ''} ${ds === new Date().toDateString() ? 'is-today' : ''}`; 
-                div.onclick = () => { 
-                    window.selectedDateStr = ds; 
-                    window.updateTargetDateUI(); 
-                    window.renderCalendar(); 
-                    window.renderPersonalApp(); 
-                }; 
-                let sumHTML = net !== 0 ? `<span class="text-[7px] font-black mt-1 ${net > 0 ? (ds === window.selectedDateStr ? 'text-white' : 'text-emerald-500') : (ds === window.selectedDateStr ? 'text-white' : 'text-red-500')}">${net > 0 ? '+' : ''}${Math.round(net)}</span>` : ''; 
-                div.innerHTML = `<span>${d}</span>${sumHTML}`; 
-                c.appendChild(div); 
-            } 
-        };
-
-        window.updateChart = function(data) { 
-            const canvas = document.getElementById('expenseChart'); if (!canvas) return; 
-            if (window.myChart) window.myChart.destroy(); 
-            const labels = Object.keys(data); if (labels.length === 0) return; 
-            window.myChart = new Chart(canvas.getContext('2d'), { 
-                type: 'doughnut', 
-                data: { labels: labels, datasets: [{ data: Object.values(data), backgroundColor: ['#38bdf8', '#fbbf24', '#f43f5e', '#10b981', '#818cf8'], borderWidth: 0 }] }, 
-                options: { plugins: { legend: { display: false } }, cutout: '70%', responsive: true, maintainAspectRatio: false } 
-            }); 
-        };
+        window.renderCalendar = function() { const c = document.getElementById('calendarDays'); if(!c) return; const y = window.calendarDate.getFullYear(), m = window.calendarDate.getMonth(); document.getElementById('yearSelect').value = y; document.getElementById('monthSelect').value = m; c.innerHTML = ''; const f = new Date(y, m, 1).getDay(), dInM = new Date(y, m + 1, 0).getDate(); for (let i = 0; i < f; i++) c.innerHTML += `<div></div>`; for (let d = 1; d <= dInM; d++) { const ds = new Date(y, m, d).toDateString(); let net = window.expenses.filter(e => e.dateStr === ds).reduce((s, i) => s + (i.type === 'income' ? i.amount : -i.amount), 0); window.recurringExpenses.forEach(r => { const rd = new Date(r.date); const isInc = r.type === 'income'; if (r.freq === 'yearly') { if (rd.getMonth() === m && rd.getDate() === d && rd.getFullYear() <= y) net += (isInc ? r.amount : -r.amount); } else { if (rd.getDate() === d && rd <= new Date(y,m,d)) net += (isInc ? r.amount : -r.amount); } }); const div = document.createElement('div'); div.className = `calendar-day hover:bg-sky-50 dark:hover:bg-slate-800 ${ds === window.selectedDateStr ? 'selected' : ''} ${ds === new Date().toDateString() ? 'is-today' : ''}`; div.onclick = () => { window.selectedDateStr = ds; window.updateTargetDateUI(); window.renderCalendar(); window.renderPersonalApp(); }; let sumHTML = net !== 0 ? `<span class="text-[7px] font-black mt-1 ${net > 0 ? (ds === window.selectedDateStr ? 'text-white' : 'text-emerald-500') : (ds === window.selectedDateStr ? 'text-white' : 'text-red-500')}">${net > 0 ? '+' : ''}${Math.round(net)}</span>` : ''; div.innerHTML = `<span>${d}</span>${sumHTML}`; c.appendChild(div); } };
+        window.updateChart = function(data) { const canvas = document.getElementById('expenseChart'); if (!canvas) return; if (window.myChart) window.myChart.destroy(); const labels = Object.keys(data); if (labels.length === 0) return; window.myChart = new Chart(canvas.getContext('2d'), { type: 'doughnut', data: { labels: labels, datasets: [{ data: Object.values(data), backgroundColor: ['#38bdf8', '#fbbf24', '#f43f5e', '#10b981', '#818cf8'], borderWidth: 0 }] }, options: { plugins: { legend: { display: false } }, cutout: '70%', responsive: true, maintainAspectRatio: false } }); };
         
         window.renderPersonalApp = function() {
-            const list = document.getElementById('expenseList'); if(!list) return; 
-            const vy = window.calendarDate.getFullYear(), vm = window.calendarDate.getMonth();
+            const list = document.getElementById('expenseList'); if(!list) return; const vy = window.calendarDate.getFullYear(), vm = window.calendarDate.getMonth();
             let fl = window.expenses.filter(i => { const d = new Date(i.dateStr); if(window.expenseFilter === 'day') return i.dateStr === window.selectedDateStr; if(window.expenseFilter === 'month') return d.getMonth() === vm && d.getFullYear() === vy; return d.getFullYear() === vy; });
             let fr = window.recurringExpenses.filter(r => { const rd = new Date(r.date); if(window.expenseFilter === 'day') return r.freq === 'monthly' ? rd.getDate() === new Date(window.selectedDateStr).getDate() && rd <= new Date(window.selectedDateStr) : rd.toDateString() === window.selectedDateStr; if(window.expenseFilter === 'month') return r.freq === 'monthly' ? rd <= new Date(vy, vm+1, 0) : rd.getMonth() === vm && rd.getFullYear() <= vy; return rd.getFullYear() <= vy; });
             
-            let net = 0, totalExp = 0; list.innerHTML = ''; 
-            const reportSec = document.getElementById('reportSection');
-            
-            if (window.expenseFilter !== 'day') { 
-                reportSec.classList.remove('hidden'); 
-                let catSum = {}; 
-                fl.forEach(i => { if(i.type === 'expense') { catSum[i.category] = (catSum[i.category] || 0) + i.amount; totalExp += i.amount; } }); 
-                fr.forEach(r => { 
-                    const isInc = r.type === 'income';
-                    const amt = (window.expenseFilter === 'year' && r.freq === 'monthly') ? r.amount * 12 : r.amount; 
-                    if (!isInc) { catSum["定期項目"] = (catSum["定期項目"] || 0) + amt; totalExp += amt; }
-                }); 
-                window.updateChart(catSum); 
-                let rHTML = ''; 
-                Object.keys(catSum).forEach(cat => { rHTML += `<div class="flex justify-between items-center text-xs font-bold"><span class="text-slate-400">${cat}</span><span class="text-slate-700 dark:text-slate-200">$${catSum[cat].toLocaleString()}</span></div>`; }); 
-                document.getElementById('reportContent').innerHTML = rHTML; 
-            } else { 
-                reportSec.classList.add('hidden'); 
-                fl.forEach(i => { if(i.type === 'expense') totalExp += i.amount; }); 
-                fr.forEach(r => { if(r.type !== 'income') totalExp += r.amount; }); 
-            }
-            
-            fl.forEach(item => { 
-                const isInc = item.type === 'income'; net += isInc ? item.amount : -item.amount; 
-                const div = document.createElement('div'); div.className = "glass-card p-6 rounded-[2rem] flex justify-between items-center border border-white dark:border-slate-800 animate-pop shadow-sm"; 
-                div.innerHTML = `<div><p class="font-black text-slate-800 dark:text-white text-sm">${item.category}${item.foreignText ? `<span class="text-[10px] text-slate-400 font-normal ml-1 border px-1.5 py-0.5 rounded-lg bg-slate-50 dark:bg-slate-700/50">(${item.foreignText})</span>` : ''}</p><p class="text-[9px] text-slate-400 font-bold uppercase mt-1">${item.dateStr}</p></div><div class="text-right"><p class="font-black text-lg ${isInc?'text-emerald-500':'text-red-500'}">${isInc?'+':'-'}$${item.amount.toFixed(2)}</p><div class="flex gap-2 justify-end mt-1"><button onclick="window.editExpense(${item.id})" class="text-slate-400 text-[8px] font-black uppercase">Edit</button><button onclick="window.deleteExpense(${item.id})" class="text-red-300 text-[8px] font-black uppercase">Del</button></div></div>`; 
-                list.appendChild(div); 
-            });
-            
-            fr.forEach(r => { 
-                const isInc = r.type === 'income';
-                const amt = (window.expenseFilter === 'year' && r.freq === 'monthly') ? r.amount * 12 : r.amount; 
-                net += isInc ? amt : -amt; 
-                const div = document.createElement('div'); div.className = "glass-card p-6 rounded-[2rem] flex justify-between items-center bg-amber-50/20 dark:bg-slate-800/80 shadow-sm border border-transparent dark:border-slate-700"; 
-                div.innerHTML = `<div><p class="font-black ${isInc?'text-emerald-600 dark:text-emerald-400':'text-amber-700 dark:text-amber-500'} text-sm">🔄 ${r.name}</p><p class="text-[9px] ${isInc?'text-emerald-400 dark:text-emerald-600':'text-amber-400 dark:text-amber-700'} font-bold uppercase mt-1">${r.date} (${r.freq === 'monthly'?'每月':'每年'})</p></div><div class="text-right"><p class="font-black text-lg ${isInc?'text-emerald-500':'text-red-500'}">${isInc?'+':'-'}$${amt.toFixed(2)}</p></div>`; 
-                list.appendChild(div); 
-            });
-            
+            let net = 0, totalExp = 0; list.innerHTML = ''; const reportSec = document.getElementById('reportSection');
+            if (window.expenseFilter !== 'day') { reportSec.classList.remove('hidden'); let catSum = {}; fl.forEach(i => { if(i.type === 'expense') { catSum[i.category] = (catSum[i.category] || 0) + i.amount; totalExp += i.amount; } }); fr.forEach(r => { const isInc = r.type === 'income'; const amt = (window.expenseFilter === 'year' && r.freq === 'monthly') ? r.amount * 12 : r.amount; if (!isInc) { catSum["定期項目"] = (catSum["定期項目"] || 0) + amt; totalExp += amt; }}); window.updateChart(catSum); let rHTML = ''; Object.keys(catSum).forEach(cat => { rHTML += `<div class="flex justify-between items-center text-xs font-bold"><span class="text-slate-400">${cat}</span><span class="text-slate-700 dark:text-slate-200">$${catSum[cat].toLocaleString()}</span></div>`; }); document.getElementById('reportContent').innerHTML = rHTML; }
+            else { reportSec.classList.add('hidden'); fl.forEach(i => { if(i.type === 'expense') totalExp += i.amount; }); fr.forEach(r => { if(r.type !== 'income') totalExp += r.amount; }); }
+            fl.forEach(item => { const isInc = item.type === 'income'; net += isInc ? item.amount : -item.amount; const div = document.createElement('div'); div.className = "glass-card p-6 rounded-[2rem] flex justify-between items-center border border-white dark:border-slate-800 animate-pop shadow-sm"; div.innerHTML = `<div><p class="font-black text-slate-800 dark:text-white text-sm">${item.category}${item.foreignText ? `<span class="text-[10px] text-slate-400 font-normal ml-1 border px-1.5 py-0.5 rounded-lg bg-slate-50 dark:bg-slate-700/50">(${item.foreignText})</span>` : ''}</p><p class="text-[9px] text-slate-400 font-bold uppercase mt-1">${item.dateStr}</p></div><div class="text-right"><p class="font-black text-lg ${isInc?'text-emerald-500':'text-red-500'}">${isInc?'+':'-'}$${item.amount.toFixed(2)}</p><div class="flex gap-2 justify-end mt-1"><button onclick="window.editExpense(${item.id})" class="text-slate-400 text-[8px] font-black uppercase">Edit</button><button onclick="window.deleteExpense(${item.id})" class="text-red-300 text-[8px] font-black uppercase">Del</button></div></div>`; list.appendChild(div); });
+            fr.forEach(r => { const isInc = r.type === 'income'; const amt = (window.expenseFilter === 'year' && r.freq === 'monthly') ? r.amount * 12 : r.amount; net += isInc ? amt : -amt; const div = document.createElement('div'); div.className = "glass-card p-6 rounded-[2rem] flex justify-between items-center bg-amber-50/20 dark:bg-slate-800/80 shadow-sm border border-transparent dark:border-slate-700"; div.innerHTML = `<div><p class="font-black ${isInc?'text-emerald-600 dark:text-emerald-400':'text-amber-700 dark:text-amber-500'} text-sm">🔄 ${r.name}</p><p class="text-[9px] ${isInc?'text-emerald-400 dark:text-emerald-600':'text-amber-400 dark:text-amber-700'} font-bold uppercase mt-1">${r.date} (${r.freq === 'monthly'?'每月':'每年'})</p></div><div class="text-right"><p class="font-black text-lg ${isInc?'text-emerald-500':'text-red-500'}">${isInc?'+':'-'}$${amt.toFixed(2)}</p></div>`; list.appendChild(div); });
             document.getElementById('totalAmount').innerText = `$ ${net.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
-            
             const budgetBar = document.getElementById('budgetBar'), budgetText = document.getElementById('budgetText'), budgetRemaining = document.getElementById('budgetRemaining'); 
             if(window.monthlyBudget > 0) { 
-                let usage = (totalExp / window.monthlyBudget) * 100; 
+                let currentBudget = window.expenseFilter === 'year' ? window.monthlyBudget * 12 : window.monthlyBudget;
+                let usage = (totalExp / currentBudget) * 100; 
                 budgetBar.style.width = `${Math.min(usage, 100)}%`; 
                 if (usage > 90) budgetBar.className = 'bg-red-400 h-full'; 
                 else if (usage > 75) budgetBar.className = 'bg-amber-300 h-full'; 
                 else budgetBar.className = 'bg-white h-full'; 
-                budgetText.innerText = `預算: $${window.monthlyBudget.toLocaleString()}`; 
-                if (usage <= 100) {
-                    budgetRemaining.innerText = `剩餘: $${(window.monthlyBudget - totalExp).toLocaleString()}`;
-                    budgetRemaining.className = 'text-[9px] text-white font-black tracking-widest';
-                } else {
-                    budgetRemaining.innerText = `超支: $${(totalExp - window.monthlyBudget).toLocaleString()}`;
-                    budgetRemaining.className = 'text-[9px] text-red-200 font-black tracking-widest';
-                }
-            } else { 
-                budgetBar.style.width = '0%'; 
-                budgetText.innerText = '點擊設定預算'; 
-                budgetRemaining.innerText = ''; 
-            }
+                budgetText.innerText = `預算: $${currentBudget.toLocaleString()}`; 
+                if (usage <= 100) { budgetRemaining.innerText = `剩餘: $${(currentBudget - totalExp).toLocaleString()}`; budgetRemaining.className = 'text-[9px] text-white font-black tracking-widest'; } 
+                else { budgetRemaining.innerText = `超支: $${(totalExp - currentBudget).toLocaleString()}`; budgetRemaining.className = 'text-[9px] text-red-200 font-black tracking-widest'; }
+            } else { budgetBar.style.width = '0%'; budgetText.innerText = '點擊設定預算'; budgetRemaining.innerText = ''; }
         };
 
-        window.setEntryType = function(t) { 
-            window.currentType = t; 
-            document.getElementById('typeExpBtn').classList.toggle('active', t === 'expense'); 
-            document.getElementById('typeIncBtn').classList.toggle('active', t === 'income'); 
-            document.getElementById('addBtn').innerText = t === 'expense' ? "確認存檔" : "收入存檔"; 
-        };
-
-        window.addExpense = function() { 
-            const a = parseFloat(document.getElementById('amountInput').value);
-            const c = document.getElementById('categoryInput').value.trim() || '雜項';
-            const eid = document.getElementById('editingId').value; 
-            
-            if (!a || a <= 0) return; 
-            if(!window.customCategories.includes(c)) window.customCategories.push(c); 
-            
-            if(eid){ 
-                const idx = window.expenses.findIndex(e => e.id == eid); 
-                if(idx !== -1){ 
-                    window.expenses[idx].amount = a; 
-                    window.expenses[idx].category = c; 
-                    window.expenses[idx].type = window.currentType; 
-                    if (window.personalForeignText) window.expenses[idx].foreignText = window.personalForeignText; 
-                } 
-            } else { 
-                window.expenses.unshift({id: Date.now(), amount: a, category: c, type: window.currentType, dateStr: window.selectedDateStr, foreignText: window.personalForeignText}); 
-            } 
-            
-            window.saveToData(); window.resetForm(); window.renderPersonalApp(); window.renderCalendar(); window.refreshCategoryOptions(); window.showToast("數據已更新 ✨"); 
-        };
-
-        window.editExpense = function(id) { 
-            const i = window.expenses.find(e => e.id == id); if(!i) return; 
-            document.getElementById('amountInput').value = i.amount; 
-            document.getElementById('categoryInput').value = i.category; 
-            document.getElementById('editingId').value = i.id; 
-            
-            window.personalForeignText = i.foreignText || ""; 
-            const disp = document.getElementById('foreignDisplay'); 
-            if (window.personalForeignText) { 
-                disp.innerText = `目前外幣紀錄: (${window.personalForeignText})`; 
-                disp.classList.remove('hidden'); 
-            } else { 
-                disp.classList.add('hidden'); 
-            } 
-            
-            window.setEntryType(i.type || 'expense'); 
-            document.getElementById('addBtn').innerText = "確認修改記錄"; 
-            document.getElementById('cancelEditBtn').classList.remove('hidden'); 
-            window.selectedDateStr = i.dateStr; 
-            window.updateTargetDateUI(); 
-            window.renderCalendar(); 
-            document.getElementById('expenseEditorArea').scrollIntoView({ behavior: 'smooth', block: 'center' }); 
-        };
-
-        window.resetForm = function() { 
-            document.getElementById('amountInput').value = ''; 
-            document.getElementById('categoryInput').value = ''; 
-            document.getElementById('editingId').value = ''; 
-            window.setEntryType('expense'); 
-            document.getElementById('cancelEditBtn').classList.add('hidden'); 
-            document.getElementById('addBtn').innerText = "確認存檔"; 
-            window.personalForeignText = ""; 
-            const disp = document.getElementById('foreignDisplay'); 
-            if(disp) disp.classList.add('hidden'); 
-        };
-
-        window.deleteExpense = function(id) { 
-            window.askConfirm("刪除紀錄？", "永久移除該帳目。", () => { 
-                window.expenses = window.expenses.filter(i => i.id !== id); 
-                window.saveToData(); window.renderPersonalApp(); window.renderCalendar(); 
-            }); 
-        };
-
-        window.setExpenseFilter = function(f) { 
-            window.expenseFilter = f; 
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active')); 
-            document.getElementById(`btnFilter${f.charAt(0).toUpperCase()+f.slice(1)}`).classList.add('active'); 
-            if(f === 'day') window.selectedDateStr = new Date().toDateString(); 
-            window.renderPersonalApp(); window.renderCalendar(); 
-        };
-
-        window.toggleCategoryManager = function() { 
-            const m = document.getElementById('categoryManager'); 
-            m.classList.toggle('hidden'); 
-            if(!m.classList.contains('hidden')) window.renderCategoryTags(); 
-        };
-
-        window.renderCategoryTags = function() { 
-            const l = document.getElementById('categoryTagsList'); l.innerHTML = ''; 
-            window.customCategories.forEach(cat => { 
-                const t = document.createElement('div'); 
-                t.className = "flex items-center gap-1 bg-white dark:bg-slate-800 px-3 py-1.5 rounded-full border text-[11px] font-black text-sky-600 shadow-sm active:scale-95 cursor-pointer"; 
-                t.innerHTML = `<span onclick="window.selectCategory('${cat}')">${cat}</span><button onclick="window.removeCategory('${cat}')" class="ml-1 text-red-200">✕</button>`; 
-                l.appendChild(t); 
-            }); 
-        };
-
-        window.selectCategory = function(cat) { 
-            document.getElementById('categoryInput').value = cat; 
-            window.toggleCategoryManager(); 
-        };
-
-        window.removeCategory = function(cat) { 
-            window.askConfirm("刪除類別？", `移除「${cat}」嗎？`, () => { 
-                window.customCategories = window.customCategories.filter(c => c !== cat); 
-                window.saveToData(); window.refreshCategoryOptions(); window.renderCategoryTags(); 
-            }); 
-        };
-
-        window.refreshCategoryOptions = function() { 
-            const dl = document.getElementById('categories'); 
-            if(dl) dl.innerHTML = window.customCategories.map(cat => `<option value="${cat}">`).join(''); 
-        };
+        window.setEntryType = function(t) { window.currentType = t; document.getElementById('typeExpBtn').classList.toggle('active', t === 'expense'); document.getElementById('typeIncBtn').classList.toggle('active', t === 'income'); document.getElementById('addBtn').innerText = t === 'expense' ? "確認存檔" : "收入存檔"; };
+        window.addExpense = function() { const a = parseFloat(document.getElementById('amountInput').value), c = document.getElementById('categoryInput').value.trim() || '雜項', eid = document.getElementById('editingId').value; if (!a || a <= 0) return; if(!window.customCategories.includes(c)) window.customCategories.push(c); if(eid){ const idx = window.expenses.findIndex(e => e.id == eid); if(idx !== -1){ window.expenses[idx].amount = a; window.expenses[idx].category = c; window.expenses[idx].type = window.currentType; if (window.personalForeignText) window.expenses[idx].foreignText = window.personalForeignText; } } else { window.expenses.unshift({id: Date.now(), amount: a, category: c, type: window.currentType, dateStr: window.selectedDateStr, foreignText: window.personalForeignText}); } window.saveToData(); window.resetForm(); window.renderPersonalApp(); window.renderCalendar(); window.refreshCategoryOptions(); window.showToast("數據已更新 ✨"); };
+        window.editExpense = function(id) { const i = window.expenses.find(e => e.id == id); if(!i) return; document.getElementById('amountInput').value = i.amount; document.getElementById('categoryInput').value = i.category; document.getElementById('editingId').value = i.id; window.personalForeignText = i.foreignText || ""; const disp = document.getElementById('foreignDisplay'); if (window.personalForeignText) { disp.innerText = `目前外幣紀錄: (${window.personalForeignText})`; disp.classList.remove('hidden'); } else { disp.classList.add('hidden'); } window.setEntryType(i.type || 'expense'); document.getElementById('addBtn').innerText = "確認修改記錄"; document.getElementById('cancelEditBtn').classList.remove('hidden'); window.selectedDateStr = i.dateStr; window.updateTargetDateUI(); window.renderCalendar(); document.getElementById('expenseEditorArea').scrollIntoView({ behavior: 'smooth', block: 'center' }); };
+        window.resetForm = function() { document.getElementById('amountInput').value = ''; document.getElementById('categoryInput').value = ''; document.getElementById('editingId').value = ''; window.setEntryType('expense'); document.getElementById('cancelEditBtn').classList.add('hidden'); document.getElementById('addBtn').innerText = "確認存檔"; window.personalForeignText = ""; const disp = document.getElementById('foreignDisplay'); if(disp) disp.classList.add('hidden'); };
+        window.deleteExpense = function(id) { window.askConfirm("刪除紀錄？", "永久移除該帳目。", () => { window.expenses = window.expenses.filter(i => i.id !== id); window.saveToData(); window.renderPersonalApp(); window.renderCalendar(); }); };
+        window.setExpenseFilter = function(f) { window.expenseFilter = f; document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active')); document.getElementById(`btnFilter${f.charAt(0).toUpperCase()+f.slice(1)}`).classList.add('active'); if(f === 'day') window.selectedDateStr = new Date().toDateString(); window.renderPersonalApp(); window.renderCalendar(); };
+        window.toggleCategoryManager = function() { const m = document.getElementById('categoryManager'); m.classList.toggle('hidden'); if(!m.classList.contains('hidden')) window.renderCategoryTags(); };
+        window.renderCategoryTags = function() { const l = document.getElementById('categoryTagsList'); l.innerHTML = ''; window.customCategories.forEach(cat => { const t = document.createElement('div'); t.className = "flex items-center gap-1 bg-white dark:bg-slate-800 px-3 py-1.5 rounded-full border text-[11px] font-black text-sky-600 shadow-sm active:scale-95 cursor-pointer"; t.innerHTML = `<span onclick="window.selectCategory('${cat}')">${cat}</span><button onclick="window.removeCategory('${cat}')" class="ml-1 text-red-200">✕</button>`; l.appendChild(t); }); };
+        window.selectCategory = function(cat) { document.getElementById('categoryInput').value = cat; window.toggleCategoryManager(); };
+        window.removeCategory = function(cat) { window.askConfirm("刪除類別？", `移除「${cat}」嗎？`, () => { window.customCategories = window.customCategories.filter(c => c !== cat); window.saveToData(); window.refreshCategoryOptions(); window.renderCategoryTags(); }); };
+        window.refreshCategoryOptions = function() { const dl = document.getElementById('categories'); if(dl) dl.innerHTML = window.customCategories.map(cat => `<option value="${cat}">`).join(''); };
 
         // --- 年度/薪資 ---
-        window.setRecType = function(t) { 
-            window.currentRecType = t; 
-            document.getElementById('recTypeExpBtn').classList.toggle('active', t === 'expense'); 
-            document.getElementById('recTypeIncBtn').classList.toggle('active', t === 'income'); 
-            document.getElementById('recurringAddBtn').innerText = t === 'expense' ? "確認存檔" : "收入存檔"; 
-        };
-
-        window.syncSalary = function(t) { 
-            const m=document.getElementById('monthlySalaryInput'), y=document.getElementById('yearlySalaryInput'); 
-            if(t==='monthly'){
-                window.userSalary.monthly=parseFloat(m.value)||0; 
-                window.userSalary.yearly=window.userSalary.monthly*12; 
-                y.value=window.userSalary.yearly||"";
-            } else {
-                window.userSalary.yearly=parseFloat(y.value)||0; 
-                window.userSalary.monthly=Math.round(window.userSalary.yearly/12); 
-                m.value=window.userSalary.monthly||"";
-            } 
-            window.saveToData(); window.renderRecurringApp(); window.renderPersonalApp(); 
-        };
-
+        window.setRecType = function(t) { window.currentRecType = t; document.getElementById('recTypeExpBtn').classList.toggle('active', t === 'expense'); document.getElementById('recTypeIncBtn').classList.toggle('active', t === 'income'); document.getElementById('recurringAddBtn').innerText = t === 'expense' ? "確認存檔" : "收入存檔"; };
+        window.syncSalary = function(t) { const m=document.getElementById('monthlySalaryInput'), y=document.getElementById('yearlySalaryInput'); if(t==='monthly'){ window.userSalary.monthly=parseFloat(m.value)||0; window.userSalary.yearly=window.userSalary.monthly*12; y.value=window.userSalary.yearly||""; } else { window.userSalary.yearly=parseFloat(y.value)||0; window.userSalary.monthly=Math.round(window.userSalary.yearly/12); m.value=window.userSalary.monthly||""; } window.saveToData(); window.renderRecurringApp(); window.renderPersonalApp(); };
         window.renderRecurringApp = function() { 
             const list = document.getElementById('realRecurringList'); if(!list) return; 
             let totalAnnual = 0; let totalAnnualExpenses = 0; list.innerHTML = ''; 
-            
             window.recurringExpenses.forEach(r => { 
-                const isInc = r.type === 'income';
-                const amt = r.freq === 'monthly' ? r.amount * 12 : r.amount; 
+                const isInc = r.type === 'income'; const amt = r.freq === 'monthly' ? r.amount * 12 : r.amount; 
                 if(isInc) totalAnnual += amt; else { totalAnnual -= amt; totalAnnualExpenses += amt; }
-                
                 const row = document.createElement('tr'); row.className = "border-b border-slate-100 dark:border-slate-800 text-[10px]"; 
                 row.innerHTML = `<td class="px-5 py-6 font-bold dark:text-slate-200">${r.name}<br><span class="${isInc?'text-emerald-500':'text-red-500'} font-bold">${isInc?'+':'-'}$${r.amount.toFixed(2)} <span class="text-[9px] text-slate-400">(${r.freq === 'monthly'?'每月':'每年'})</span></span></td><td class="px-3 py-6 text-center text-slate-400">${new Date(r.date).toLocaleDateString('zh-HK',{month:'short',day:'numeric'})}</td><td class="px-5 py-6 text-right"><button onclick="window.editRecurring(${r.id})" class="text-sky-500 font-black mr-2 active:scale-90 transition-all inline-block">EDIT</button><button onclick="window.deleteRecurring(${r.id})" class="text-red-300 font-black active:scale-90 transition-all inline-block">DEL</button></td>`; 
                 list.appendChild(row); 
             }); 
-            
             const totalDisplay = document.getElementById('totalRecurring');
             totalDisplay.innerText = `${totalAnnual >= 0 ? (totalAnnual > 0 ? '+' : '') : '-'}$ ${Math.abs(totalAnnual).toLocaleString(undefined, {minimumFractionDigits: 2})}`; 
-            if (totalAnnual > 0) totalDisplay.classList.replace('text-white', 'text-emerald-200');
-            else totalDisplay.classList.replace('text-emerald-200', 'text-white');
-
-            if(window.userSalary.yearly > 0) { 
-                const p = (totalAnnualExpenses / window.userSalary.yearly) * 100; 
-                document.getElementById('salaryUsageText').innerText = `${p.toFixed(1)}%`; 
-                document.getElementById('salaryUsageBar').style.width = `${Math.min(p, 100)}%`; 
-                const remaining = window.userSalary.yearly + totalAnnual;
-                document.getElementById('remainingSalaryText').innerText = `淨餘額: $ ${remaining.toLocaleString()}`; 
-            } else {
-                document.getElementById('salaryUsageText').innerText = `0%`; 
-                document.getElementById('salaryUsageBar').style.width = `0%`; 
-                document.getElementById('remainingSalaryText').innerText = `$ 0.00`; 
-            }
+            if (totalAnnual > 0) totalDisplay.classList.replace('text-white', 'text-emerald-200'); else totalDisplay.classList.replace('text-emerald-200', 'text-white');
+            if(window.userSalary.yearly > 0) { const p = (totalAnnualExpenses / window.userSalary.yearly) * 100; document.getElementById('salaryUsageText').innerText = `${p.toFixed(1)}%`; document.getElementById('salaryUsageBar').style.width = `${Math.min(p, 100)}%`; const remaining = window.userSalary.yearly + totalAnnual; document.getElementById('remainingSalaryText').innerText = `淨餘額: $ ${remaining.toLocaleString()}`; } 
+            else { document.getElementById('salaryUsageText').innerText = `0%`; document.getElementById('salaryUsageBar').style.width = `0%`; document.getElementById('remainingSalaryText').innerText = `$ 0.00`; }
         };
-
-        window.addRecurring = function() { 
-            const n = document.getElementById('recurringName').value.trim();
-            const d = document.getElementById('recurringDate').value;
-            const a = parseFloat(document.getElementById('recurringAmount').value);
-            const f = document.getElementById('recurringFreq').value;
-            const eid = document.getElementById('editingRecurringId').value; 
-            const type = window.currentRecType;
-            if(!n || !d || !a) return window.showToast("資料不全"); 
-            
-            if(eid) { 
-                const idx = window.recurringExpenses.findIndex(r => r.id == eid); 
-                if(idx !== -1) window.recurringExpenses[idx] = {id: Number(eid), name: n, date: d, amount: a, freq: f, type: type}; 
-            } else { 
-                window.recurringExpenses.push({id: Date.now(), name: n, date: d, amount: a, freq: f, type: type}); 
-            } 
-            window.saveToData(); window.resetRecurringForm(); window.renderRecurringApp(); window.renderPersonalApp(); window.renderCalendar(); window.showToast("定期項目已同步 ✨"); 
-        };
-
-        window.editRecurring = function(id) { 
-            const i = window.recurringExpenses.find(r => r.id == id); if (!i) return; 
-            document.getElementById('recurringName').value = i.name; 
-            document.getElementById('recurringDate').value = i.date; 
-            document.getElementById('recurringAmount').value = i.amount; 
-            document.getElementById('recurringFreq').value = i.freq || 'monthly'; 
-            document.getElementById('editingRecurringId').value = i.id; 
-            window.setRecType(i.type || 'expense');
-            document.getElementById('recurringAddBtn').innerText = "確認修改"; 
-            document.getElementById('cancelRecurringEditBtn').classList.remove('hidden'); 
-            document.getElementById('recurringEditorArea').scrollIntoView({ behavior: 'smooth', block: 'center' }); 
-        };
-
-        window.resetRecurringForm = function() { 
-            document.getElementById('recurringName').value = ''; 
-            document.getElementById('recurringAmount').value = ''; 
-            document.getElementById('editingRecurringId').value = ''; 
-            document.getElementById('recurringDate').valueAsDate = new Date(); 
-            document.getElementById('recurringFreq').value = 'monthly'; 
-            window.setRecType('expense');
-            document.getElementById('recurringAddBtn').innerText = "確認存檔"; 
-            document.getElementById('cancelRecurringEditBtn').classList.add('hidden'); 
-        };
-
-        window.deleteRecurring = function(id) { 
-            window.askConfirm("刪除定期項目？", "不再同步。", () => { 
-                window.recurringExpenses = window.recurringExpenses.filter(r => r.id !== id); 
-                window.saveToData(); window.renderRecurringApp(); window.renderPersonalApp(); window.renderCalendar(); 
-            }); 
-        };
+        window.addRecurring = function() { const n = document.getElementById('recurringName').value.trim(), d = document.getElementById('recurringDate').value, a = parseFloat(document.getElementById('recurringAmount').value), f = document.getElementById('recurringFreq').value, eid = document.getElementById('editingRecurringId').value, type = window.currentRecType; if(!n || !d || !a) return window.showToast("資料不全"); if(eid) { const idx = window.recurringExpenses.findIndex(r => r.id == eid); if(idx !== -1) window.recurringExpenses[idx] = {id: Number(eid), name: n, date: d, amount: a, freq: f, type: type}; } else { window.recurringExpenses.push({id: Date.now(), name: n, date: d, amount: a, freq: f, type: type}); } window.saveToData(); window.resetRecurringForm(); window.renderRecurringApp(); window.renderPersonalApp(); window.renderCalendar(); window.showToast("定期項目已同步 ✨"); };
+        window.editRecurring = function(id) { const i = window.recurringExpenses.find(r => r.id == id); if (!i) return; document.getElementById('recurringName').value = i.name; document.getElementById('recurringDate').value = i.date; document.getElementById('recurringAmount').value = i.amount; document.getElementById('recurringFreq').value = i.freq || 'monthly'; document.getElementById('editingRecurringId').value = i.id; window.setRecType(i.type || 'expense'); document.getElementById('recurringAddBtn').innerText = "確認修改"; document.getElementById('cancelRecurringEditBtn').classList.remove('hidden'); document.getElementById('recurringEditorArea').scrollIntoView({ behavior: 'smooth', block: 'center' }); };
+        window.resetRecurringForm = function() { document.getElementById('recurringName').value = ''; document.getElementById('recurringAmount').value = ''; document.getElementById('editingRecurringId').value = ''; document.getElementById('recurringDate').valueAsDate = new Date(); document.getElementById('recurringFreq').value = 'monthly'; window.setRecType('expense'); document.getElementById('recurringAddBtn').innerText = "確認存檔"; document.getElementById('cancelRecurringEditBtn').classList.add('hidden'); };
+        window.deleteRecurring = function(id) { window.askConfirm("刪除定期項目？", "不再同步。", () => { window.recurringExpenses = window.recurringExpenses.filter(r => r.id !== id); window.saveToData(); window.renderRecurringApp(); window.renderPersonalApp(); window.renderCalendar(); }); };
 
         // --- 分帳同步邏輯 ---
-        window.syncAllCloudEvents = async function() { 
-            if (!window.db || !window.auth || !window.auth.currentUser) return; 
-            let changed = false; 
-            for (let i = window.splitEvents.length - 1; i >= 0; i--) { 
-                let e = window.splitEvents[i]; 
-                if (e.isCloud) { 
-                    try { 
-                        const docSnap = await window.getDoc(window.doc(window.db, "artifacts", window.appId, "public", "data", "splitEvents", String(e.id))); 
-                        if (!docSnap.exists() || docSnap.data().isDeleted) { 
-                            window.splitEvents.splice(i, 1); changed = true; 
-                        } else if (JSON.stringify(window.splitEvents[i]) !== JSON.stringify(docSnap.data())) { 
-                            window.splitEvents[i] = docSnap.data(); changed = true; 
-                        } 
-                    } catch(err) { } 
-                } 
-            } 
-            if (changed) { window.saveToData(); window.renderEventList(); } 
-        };
-
-        window.showQRModal = function(id) { 
-            const qr = document.getElementById('qrcodeDisplay'); qr.innerHTML = ''; 
-            const joinUrl = window.location.origin + window.location.pathname + '?join=' + id; 
-            document.getElementById('qrUrlDisplay').innerText = joinUrl; 
-            new QRCode(qr, { text: joinUrl, width: 160, height: 160, colorDark : "#1e293b", colorLight : "#ffffff" }); 
-            document.getElementById('qrModal').classList.remove('hidden'); 
-            document.getElementById('qrModal').classList.add('flex'); 
-            setTimeout(() => document.getElementById('qrModal').style.opacity = "1", 10); 
-        };
-
-        window.closeQRModal = function() { 
-            document.getElementById('qrModal').style.opacity = "0"; 
-            setTimeout(() => { document.getElementById('qrModal').classList.add('hidden'); document.getElementById('qrModal').classList.remove('flex'); }, 300); 
-        };
-
-        window.startQRScanner = function() { 
-            document.getElementById('qrScanModal').classList.remove('hidden'); 
-            document.getElementById('qrScanModal').classList.add('flex'); 
-            setTimeout(() => document.getElementById('qrScanModal').style.opacity = "1", 10); 
-            
-            if (!window.html5QrCode) { 
-                window.html5QrCode = new Html5Qrcode("qr-reader"); 
-            } 
-            
-            window.html5QrCode.start(
-                { facingMode: "environment" },
-                { fps: 10, qrbox: { width: 250, height: 250 } },
-                (decodedText) => { 
-                    window.html5QrCode.stop().then(() => {
-                        window.closeQRScanner(); 
-                        let joinId = decodedText; 
-                        if (joinId.includes('join=')) joinId = joinId.split('join=')[1].split('&')[0].split('#')[0]; 
-                        document.getElementById('cloudIdInput').value = joinId; 
-                        window.joinCloudEvent(joinId); 
-                    });
-                },
-                (err) => { }
-            ).catch((err) => {
-                window.showToast("無法啟動相機 📷 (請檢查權限)");
-            });
-        };
-
-        window.closeQRScanner = function() { 
-            document.getElementById('qrScanModal').style.opacity = "0"; 
-            setTimeout(() => { document.getElementById('qrScanModal').classList.add('hidden'); document.getElementById('qrScanModal').classList.remove('flex'); }, 300); 
-            if(window.html5QrCode) {
-                try { window.html5QrCode.stop().catch(e => {}); } catch(e) {}
-            }
-        };
-
+        window.syncAllCloudEvents = async function() { if (!window.db || !window.auth || !window.auth.currentUser) return; let changed = false; for (let i = window.splitEvents.length - 1; i >= 0; i--) { let e = window.splitEvents[i]; if (e.isCloud) { try { const docSnap = await window.getDoc(window.doc(window.db, "artifacts", window.appId, "public", "data", "splitEvents", String(e.id))); if (!docSnap.exists() || docSnap.data().isDeleted) { window.splitEvents.splice(i, 1); changed = true; } else if (JSON.stringify(window.splitEvents[i]) !== JSON.stringify(docSnap.data())) { window.splitEvents[i] = docSnap.data(); changed = true; } } catch(err) { } } } if (changed) { window.saveToData(); window.renderEventList(); } };
+        window.showQRModal = function(id) { const qr = document.getElementById('qrcodeDisplay'); qr.innerHTML = ''; const joinUrl = window.location.origin + window.location.pathname + '?join=' + id; document.getElementById('qrUrlDisplay').innerText = joinUrl; new QRCode(qr, { text: joinUrl, width: 160, height: 160, colorDark : "#1e293b", colorLight : "#ffffff" }); document.getElementById('qrModal').classList.remove('hidden'); document.getElementById('qrModal').classList.add('flex'); setTimeout(() => document.getElementById('qrModal').style.opacity = "1", 10); };
+        window.closeQRModal = function() { document.getElementById('qrModal').style.opacity = "0"; setTimeout(() => { document.getElementById('qrModal').classList.add('hidden'); document.getElementById('qrModal').classList.remove('flex'); }, 300); };
+        window.startQRScanner = function() { document.getElementById('qrScanModal').classList.remove('hidden'); document.getElementById('qrScanModal').classList.add('flex'); setTimeout(() => document.getElementById('qrScanModal').style.opacity = "1", 10); if (!window.html5QrCode) { window.html5QrCode = new Html5Qrcode("qr-reader"); } window.html5QrCode.start( { facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 } }, (decodedText) => { window.html5QrCode.stop().then(() => { window.closeQRScanner(); let joinId = decodedText; if (joinId.includes('join=')) joinId = joinId.split('join=')[1].split('&')[0].split('#')[0]; document.getElementById('cloudIdInput').value = joinId; window.joinCloudEvent(joinId); }); }, (err) => { } ).catch((err) => { window.showToast("無法啟動相機 📷 (請檢查權限)"); }); };
+        window.closeQRScanner = function() { document.getElementById('qrScanModal').style.opacity = "0"; setTimeout(() => { document.getElementById('qrScanModal').classList.add('hidden'); document.getElementById('qrScanModal').classList.remove('flex'); }, 300); if(window.html5QrCode) { try { window.html5QrCode.stop().catch(e => {}); } catch(e) {} } };
+        window.handleQRImageUpload = async function(e) { const file = e.target.files[0]; if (!file) return; try { const html5QrCode = new Html5Qrcode("qr-reader"); const decodedText = await html5QrCode.scanFile(file, true); html5QrCode.clear(); window.closeQRScanner(); let joinId = decodedText; if (joinId.includes('join=')) joinId = joinId.split('join=')[1].split('&')[0].split('#')[0]; document.getElementById('cloudIdInput').value = joinId; window.joinCloudEvent(joinId); } catch (err) { window.showToast("無法辨識 QR Code ❌"); } e.target.value = ''; };
         window.toggleSplitCurrency = function() { document.getElementById('splitCurrencyPanel').classList.toggle('hidden'); };
+        window.applySplitCurrency = function() { const cur = document.getElementById('splitForeignCurrency').value, amt = parseFloat(document.getElementById('splitForeignAmount').value); if (!amt) return window.showToast("請輸入金額"); const hkd = (amt * (window.liveRates[cur] || 1)).toFixed(2); document.getElementById('itemAmount').value = hkd; window.splitForeignText = `${cur} ${amt}`; const disp = document.getElementById('splitForeignDisplay'); if(disp) { disp.innerText = `約 HKD $${hkd} (${window.splitForeignText})`; disp.classList.remove('hidden'); } window.showToast(`已套用匯率 ✨`); document.getElementById('splitCurrencyPanel').classList.add('hidden'); };
         
-        window.applySplitCurrency = function() { 
-            const cur = document.getElementById('splitForeignCurrency').value;
-            const amt = parseFloat(document.getElementById('splitForeignAmount').value); 
-            if (!amt) return window.showToast("請輸入金額"); 
-            const hkd = (amt * (window.liveRates[cur] || 1)).toFixed(2); 
-            document.getElementById('itemAmount').value = hkd; 
-            window.splitForeignText = `${cur} ${amt}`; 
-            const disp = document.getElementById('splitForeignDisplay'); 
-            if(disp) { 
-                disp.innerText = `約 HKD $${hkd} (${window.splitForeignText})`; 
-                disp.classList.remove('hidden'); 
-            } 
-            window.showToast(`已套用匯率 ✨`); 
-            document.getElementById('splitCurrencyPanel').classList.add('hidden'); 
-        };
-
-        window.renderEventList = function() { 
-            const l = document.getElementById('eventList'); if(!l) return; 
-            l.innerHTML = window.splitEvents.length === 0 ? '<div class="py-20 text-slate-300 text-xs italic text-center">No Plans Found</div>' : ''; 
-            window.splitEvents.forEach(e => { 
-                const tot = (e.items || []).reduce((s,i) => s + i.amount, 0); 
-                const card = document.createElement('div'); 
-                card.className = "glass-card p-6 rounded-[2rem] flex justify-between items-center mb-4 border active:scale-95 cursor-pointer shadow-sm"; 
-                card.innerHTML = `<div><p class="text-[9px] font-black text-emerald-600 uppercase mb-1">${e.date}${e.isCloud?' (☁️ 雲端同步)':''}</p><h4 class="font-black text-slate-800 dark:text-white text-base">${e.name}</h4></div><div class="text-right font-black text-lg text-emerald-600">$${tot.toFixed(2)}</div>`; 
-                card.onclick = () => window.openEventDetail(e.id); 
-                l.appendChild(card); 
-            }); 
-        };
+        window.renderEventList = function() { const l = document.getElementById('eventList'); if(!l) return; l.innerHTML = window.splitEvents.length === 0 ? '<div class="py-20 text-slate-300 text-xs italic text-center">No Plans Found</div>' : ''; window.splitEvents.forEach(e => { const tot = (e.items || []).reduce((s,i) => s + i.amount, 0); const card = document.createElement('div'); card.className = "glass-card p-6 rounded-[2rem] flex justify-between items-center mb-4 border active:scale-95 cursor-pointer shadow-sm"; card.innerHTML = `<div><p class="text-[9px] font-black text-emerald-600 uppercase mb-1">${e.date}${e.isCloud?' (☁️ 雲端同步)':''}</p><h4 class="font-black text-slate-800 dark:text-white text-base">${e.name}</h4></div><div class="text-right font-black text-lg text-emerald-600">$${tot.toFixed(2)}</div>`; card.onclick = () => window.openEventDetail(e.id); l.appendChild(card); }); };
         
+        // 💡 分帳頁面大改版：Overview & Expenses 雙分頁
         window.openEventDetail = function(id) { 
-            window.currentEventId = id; 
-            const event = window.splitEvents.find(e => e.id === id); 
-            document.getElementById('splitHome').classList.add('hidden'); 
-            document.getElementById('eventDetailSection').classList.remove('hidden'); 
+            window.currentEventId = id; const event = window.splitEvents.find(e => e.id === id); 
+            document.getElementById('splitHome').classList.add('hidden'); document.getElementById('eventDetailSection').classList.remove('hidden'); 
             
             const leaveBtn = document.getElementById('leavePlanBtn');
             const deleteBtn = document.getElementById('deletePlanBtn');
             const isOwner = event.isOwner !== false; 
             
             if (event.isCloud) {
-                if (isOwner) {
-                    leaveBtn.classList.add('hidden');
-                    deleteBtn.classList.remove('hidden');
-                } else {
-                    leaveBtn.classList.remove('hidden');
-                    deleteBtn.classList.add('hidden');
-                }
-            } else {
-                leaveBtn.classList.add('hidden');
-                deleteBtn.classList.remove('hidden');
-            }
+                if (isOwner) { leaveBtn.classList.add('hidden'); deleteBtn.classList.remove('hidden'); } 
+                else { leaveBtn.classList.remove('hidden'); deleteBtn.classList.add('hidden'); }
+            } else { leaveBtn.classList.add('hidden'); deleteBtn.classList.remove('hidden'); }
             
             if(event.isCloud && window.db && window.isCloudReady) { 
                 if(window.unsubscribeCloud) window.unsubscribeCloud(); 
                 window.unsubscribeCloud = window.onSnapshot(window.doc(window.db, "artifacts", window.appId, "public", "data", "splitEvents", String(id)), (docSnap) => { 
                     if(docSnap.exists()) { 
                         const data = docSnap.data(); 
-                        if (data.isDeleted) { 
-                            window.splitEvents = window.splitEvents.filter(e => e.id !== id); 
-                            window.saveToData(); 
-                            window.showSplitHome(); 
-                        } else { 
+                        if (data.isDeleted) { window.splitEvents = window.splitEvents.filter(e => e.id !== id); window.saveToData(); window.showSplitHome(); } 
+                        else { 
                             const idx = window.splitEvents.findIndex(e => e.id === id); 
                             if(idx !== -1) {
                                 const wasOwner = window.splitEvents[idx].isOwner;
-                                window.splitEvents[idx] = data; 
-                                window.splitEvents[idx].isOwner = wasOwner !== false;
-                                window.saveToData(); 
-                                window.renderSplitCalendar(); 
-                                window.renderEventItems(); 
+                                window.splitEvents[idx] = data; window.splitEvents[idx].isOwner = wasOwner !== false; window.saveToData(); 
+                                if(window.currentEventId === id) window.renderEventDetail(); // 重新渲染當前畫面
                             }
                         } 
                     } 
                 }); 
             }
-            const inner = document.getElementById('eventDetailInner'); 
-            inner.innerHTML = `
-                <div class="bg-emerald-600 rounded-[2.8rem] p-8 mb-6 text-white text-center shadow-md"> 
-                    <h2 class="text-3xl font-black mb-2 flex items-center justify-center gap-2">
-                        <span>${event.name}</span>
-                        <button onclick="window.editEventName()" class="text-emerald-300 text-2xl active:scale-90 transition-all">✏️</button>
-                    </h2> 
-                    <p class="text-emerald-100 text-[11px] mb-6 font-bold">${event.members.join(' • ')}</p> 
-                    ${event.isCloud ? `<div class="flex justify-center gap-3"> <button onclick='window.copyId("${event.id}")' class='flex-1 py-3 bg-white/20 rounded-xl text-[10px] font-bold active:scale-95'>📋 複製代碼</button> <button onclick='window.showQRModal("${event.id}")' class='flex-1 py-3 bg-white/20 rounded-xl text-[10px] font-bold active:scale-95'>📱 QR Code</button> </div>` : ''} 
-                </div> 
-                <div class="glass-card rounded-[2.8rem] p-6 text-center mb-6"> 
-                    <div class="flex justify-between items-center mb-4 px-4"> 
-                        <button onclick="window.changeSplitMonth(-1)" class="w-8 h-8 flex items-center justify-center bg-white dark:bg-slate-800 rounded-full border shadow-sm text-slate-400">❮</button> 
-                        <span id="splitMonthDisplay" class="font-black text-slate-700 dark:text-slate-200 text-sm tracking-widest uppercase"></span> 
-                        <button onclick="window.changeSplitMonth(1)" class="w-8 h-8 flex items-center justify-center bg-white dark:bg-slate-800 rounded-full border shadow-sm text-slate-400">❯</button> 
-                    </div> 
-                    <div class="grid grid-cols-7 text-slate-400 text-[10px] font-black mb-2"> 
-                        <div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div> 
-                    </div> 
-                    <div id="splitCalendarDays" class="calendar-grid gap-1"></div> 
-                </div> 
-                <div class="flex gap-2 mb-6 px-2"> 
-                    <button onclick="window.setSplitView('all')" class="flex-1 py-3 rounded-2xl text-[10px] font-black uppercase ${window.splitViewMode==='all'?'bg-emerald-500 text-white':'bg-white dark:bg-slate-800 text-slate-400 border'}">全部紀錄</button> 
-                    <button onclick="window.setSplitView('day')" class="flex-1 py-3 rounded-2xl text-[10px] font-black uppercase ${window.splitViewMode==='day'?'bg-emerald-500 text-white':'bg-white dark:bg-slate-800 text-slate-400 border'}">單日明細</button> 
-                </div> 
-                <div class="glass-card rounded-[2.8rem] p-8 mb-10 text-center"> 
-                    <h4 class="text-[10px] text-slate-400 uppercase tracking-widest italic mb-6">新增記帳</h4> 
-                    <div class="space-y-4"> 
-                        <input type="text" id="itemDesc" placeholder="消費項目" class="w-full px-5 py-4 bg-white dark:bg-slate-800 border-2 border-slate-50 dark:border-slate-700 rounded-[1.5rem] text-sm text-center font-bold"> 
-                        <div class="grid grid-cols-2 gap-4"> 
-                            <div> 
-                                <div class="flex justify-between items-center mb-1"><label class="block text-[10px] font-black text-slate-400 uppercase">金額(HKD)</label><button onclick="document.getElementById('splitCurrencyPanel').classList.toggle('hidden')" class="text-[9px] text-sky-500 underline">🌍 匯率</button></div> 
-                                <input type="number" id="itemAmount" placeholder="$" class="w-full px-5 py-4 bg-white dark:bg-slate-800 border-2 border-slate-50 dark:border-slate-700 rounded-[1.5rem] text-sm text-center font-black"> 
-                                <div id="splitForeignDisplay" class="text-[9px] text-slate-400 font-bold mt-1 hidden"></div> 
-                            </div> 
-                            <div> 
-                                <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">付款人</label> 
-                                <select id="itemPayer" class="w-full px-5 py-4 bg-white dark:bg-slate-800 border-2 border-slate-50 dark:border-slate-700 rounded-[1.5rem] text-sm font-bold text-center">${event.members.map(m => `<option value="${m}">${m}</option>`).join('')}</select> 
-                            </div> 
-                        </div> 
-                        <div id="splitCurrencyPanel" class="hidden p-4 bg-emerald-50 dark:bg-slate-900 rounded-[1.8rem] space-y-3 mt-2"> 
+            window.renderEventDetail();
+        };
+
+        window.renderEventDetail = function() {
+            const event = window.splitEvents.find(e => e.id === window.currentEventId);
+            if (!event) return;
+
+            let balances = {};
+            event.members.forEach(m => balances[m] = 0);
+            (event.items || []).forEach(item => {
+                const share = item.amount / item.participants.length;
+                balances[item.payer] += item.amount;
+                item.participants.forEach(p => balances[p] -= share);
+            });
+
+            // Overview Tab HTML
+            let overviewHtml = `
+                <div class="glass-card rounded-[2.8rem] p-8 mb-6">
+                    <h4 class="font-black text-[12px] text-emerald-600 uppercase mb-4 border-b border-emerald-50 dark:border-slate-700 pb-2 text-left">成員結餘 (Balances)</h4>
+                    <div class="space-y-3 mb-6">
+            `;
+            event.members.forEach(m => {
+                const b = balances[m];
+                overviewHtml += `
+                    <div class="flex justify-between items-center bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl">
+                        <span class="font-black text-sm dark:text-white">${m}</span>
+                        <span class="font-black text-base ${b >= 0 ? (b === 0 ? 'text-slate-400' : 'text-emerald-500') : 'text-red-500'}">
+                            ${b >= 0 ? '+' : ''}HK$${b.toFixed(2)}
+                        </span>
+                    </div>
+                `;
+            });
+            overviewHtml += `</div>`;
+
+            let tempD = [], tempC = [];
+            Object.keys(balances).forEach(m => {
+                if(balances[m] < -0.01) tempD.push({n: m, a: -balances[m]});
+                else if(balances[m] > 0.01) tempC.push({n: m, a: balances[m]});
+            });
+
+            overviewHtml += `<h4 class="font-black text-[12px] text-emerald-600 uppercase mb-4 border-b border-emerald-50 dark:border-slate-700 pb-2 text-left">結算方案 (Settle Up)</h4><div id="eventSettlement">`;
+            while(tempD.length && tempC.length) {
+                let pay = Math.min(tempD[0].a, tempC[0].a);
+                overviewHtml += `<div class="text-[11px] p-4 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 rounded-2xl border border-emerald-100/50 dark:border-emerald-800 mb-2 text-left shadow-sm">💰 <b class="font-black">${tempD[0].n}</b> 應付給 <b class="font-black">${tempC[0].n}</b> HK$${pay.toFixed(2)}</div>`;
+                tempD[0].a -= pay; tempC[0].a -= pay;
+                if(tempD[0].a <= 0.01) tempD.shift();
+                if(tempC[0].a <= 0.01) tempC.shift();
+            }
+            if(tempD.length === 0 && tempC.length === 0) overviewHtml += '<p class="text-slate-300 text-xs text-center py-4">All Settled ✨</p>';
+            overviewHtml += `</div>
+                <button onclick="window.exportSettlementImage()" class="w-full mt-4 py-4 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 font-black rounded-2xl text-[10px] uppercase shadow-sm active:scale-95 transition-all">📸 結算清單轉圖片</button>
+            </div>`;
+
+            // Expenses Tab HTML
+            let expensesHtml = `
+                <div class="glass-card rounded-[2.8rem] p-6 text-center mb-6">
+                    <div class="flex justify-between items-center mb-4 px-4">
+                        <button onclick="window.changeSplitMonth(-1)" class="w-8 h-8 flex items-center justify-center bg-white dark:bg-slate-800 rounded-full shadow-sm text-slate-400">❮</button>
+                        <span id="splitMonthDisplay" class="font-black text-slate-700 dark:text-slate-200 text-sm tracking-widest uppercase"></span>
+                        <button onclick="window.changeSplitMonth(1)" class="w-8 h-8 flex items-center justify-center bg-white dark:bg-slate-800 rounded-full shadow-sm text-slate-400">❯</button>
+                    </div>
+                    <div class="grid grid-cols-7 text-slate-400 text-[10px] font-black mb-2"><div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div></div>
+                    <div id="splitCalendarDays" class="calendar-grid gap-1"></div>
+                </div>
+                <div class="flex gap-2 mb-6 px-2">
+                    <button onclick="window.setSplitView('all')" class="flex-1 py-3 rounded-2xl text-[10px] font-black uppercase ${window.splitViewMode==='all'?'bg-emerald-500 text-white border-transparent':'bg-white dark:bg-slate-800 text-slate-400 border border-slate-200 dark:border-slate-700'} shadow-sm transition-all">全部紀錄</button>
+                    <button onclick="window.setSplitView('day')" class="flex-1 py-3 rounded-2xl text-[10px] font-black uppercase ${window.splitViewMode==='day'?'bg-emerald-500 text-white border-transparent':'bg-white dark:bg-slate-800 text-slate-400 border border-slate-200 dark:border-slate-700'} shadow-sm transition-all">單日明細</button>
+                </div>
+                <div class="glass-card rounded-[2.8rem] p-6 mb-6">
+                    <h4 class="text-[10px] text-slate-400 uppercase tracking-widest italic mb-4 text-center">新增記帳</h4>
+                    <div class="space-y-4">
+                        <input type="text" id="itemDesc" placeholder="消費項目" class="w-full px-5 py-4 bg-white dark:bg-slate-800 border-2 border-slate-50 dark:border-slate-700 rounded-[1.5rem] text-sm text-center font-bold dark:text-white">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <div class="flex justify-between items-center mb-1"><label class="block text-[10px] font-black text-slate-400 uppercase ml-1">金額(HKD)</label><button onclick="window.toggleSplitCurrency()" class="text-[9px] text-sky-500 underline">🌍 匯率</button></div>
+                                <input type="number" id="itemAmount" placeholder="$" class="w-full px-5 py-4 bg-white dark:bg-slate-800 border-2 border-slate-50 dark:border-slate-700 rounded-[1.5rem] text-sm text-center font-black dark:text-white">
+                                <div id="splitForeignDisplay" class="text-[9px] text-slate-400 font-bold mt-1 hidden text-center"></div>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">付款人</label>
+                                <select id="itemPayer" class="w-full px-5 py-4 bg-white dark:bg-slate-800 border-2 border-slate-50 dark:border-slate-700 rounded-[1.5rem] text-sm font-bold text-center dark:text-white">${event.members.map(m => `<option value="${m}">${m}</option>`).join('')}</select>
+                            </div>
+                        </div>
+                        <div id="splitCurrencyPanel" class="hidden p-4 bg-emerald-50 dark:bg-slate-900/50 rounded-[1.8rem] space-y-3 mt-2">
                             <div class="flex gap-2">
-                                <select id="splitForeignCurrency" class="flex-1 p-2 bg-white dark:bg-slate-800 border rounded-xl font-bold text-xs"><option value="JPY">JPY</option><option value="TWD">TWD</option><option value="USD">USD</option></select>
-                                <input type="number" id="splitForeignAmount" placeholder="外幣金額" class="flex-[2] p-2 bg-white dark:bg-slate-800 border rounded-xl font-bold text-xs">
-                            </div> 
-                            <button onclick="window.applySplitCurrency()" class="w-full py-2 bg-emerald-500 text-white font-black rounded-xl text-[10px]">轉換並套用</button> 
-                        </div> 
+                                <select id="splitForeignCurrency" class="flex-1 p-2 bg-white dark:bg-slate-800 border dark:border-slate-700 rounded-xl font-bold text-xs dark:text-white"><option value="JPY">JPY</option><option value="TWD">TWD</option><option value="USD">USD</option><option value="EUR">EUR</option><option value="CNY">CNY</option><option value="GBP">GBP</option></select>
+                                <input type="number" id="splitForeignAmount" placeholder="外幣金額" class="flex-[2] p-2 bg-white dark:bg-slate-800 border dark:border-slate-700 rounded-xl font-bold text-xs dark:text-white">
+                            </div>
+                            <button onclick="window.applySplitCurrency()" class="w-full py-2 bg-emerald-500 text-white font-black rounded-xl text-[10px] active:scale-95 transition-all">轉換並套用</button>
+                        </div>
                         
-                        <!-- 💡 修復: 將日期輸入框置中對齊且不超出視窗 -->
-                        <div class="mt-4 px-2 text-center">
+                        <div class="text-center mt-2 px-2">
                             <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">發生日期</label>
-                            <input type="date" id="itemDate" class="w-full h-14 px-4 bg-white dark:bg-slate-800 border-2 border-slate-50 dark:border-slate-700 rounded-[1.2rem] text-sm font-bold text-center shadow-inner outline-none box-border">
-                        </div> 
+                            <input type="date" id="itemDate" class="w-full h-14 px-4 bg-white dark:bg-slate-800 border-2 border-slate-50 dark:border-slate-700 rounded-[1.2rem] text-sm font-bold text-center shadow-inner outline-none box-border dark:text-white">
+                        </div>
                         
-                        <div id="itemParticipants" class="flex flex-wrap gap-2 justify-center py-2">${event.members.map(m => `<label class="flex items-center gap-1 px-3 py-2 bg-slate-50 dark:bg-slate-800 rounded-xl text-[10px] font-bold border"><input type="checkbox" name="part_check" value="${m}" checked>${m}</label>`).join('')}</div> 
-                        
+                        <div id="itemParticipants" class="flex flex-wrap gap-2 justify-center py-2">${event.members.map(m => `<label class="flex items-center gap-1 px-3 py-2 bg-slate-50 dark:bg-slate-800 rounded-xl text-[10px] font-bold border dark:border-slate-700 dark:text-white active:scale-95"><input type="checkbox" name="part_check" value="${m}" checked>${m}</label>`).join('')}</div>
                         <input type="hidden" id="editingSplitItemId" value="">
                         <div class="flex gap-3 mt-2">
                             <button id="cancelSplitEditBtn" onclick="window.resetSplitForm()" class="w-full bg-slate-100 dark:bg-slate-800 text-slate-400 font-black py-5 rounded-[1.5rem] text-xs uppercase shadow-sm active:scale-95 transition-all hidden">取消修改</button>
-                            <button id="addSplitBtn" onclick="window.addItemToEvent()" class="w-full bg-emerald-600 text-white font-black py-5 rounded-[1.5rem] text-xs uppercase shadow-md active:scale-95 transition-all text-center">確定入帳</button> 
+                            <button id="addSplitBtn" onclick="window.addItemToEvent()" class="w-full bg-emerald-600 text-white font-black py-5 rounded-[1.5rem] text-xs uppercase shadow-md active:scale-95 transition-all text-center">確定入帳</button>
                         </div>
-                    </div> 
-                </div> 
-                <div id="eventSettlementWrapper" class="mb-10 text-center relative">
-                    <div id="eventSettlement" class="glass-card rounded-[2.8rem] p-10 border-2 border-emerald-50 dark:border-slate-800 text-xs text-center bg-white dark:bg-slate-900"></div>
-                    <button onclick="window.exportSettlementImage()" class="mt-4 px-6 py-3 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 rounded-full text-[10px] font-black uppercase border border-emerald-100 dark:border-emerald-800 active:scale-95">📸 結算清單轉圖片</button>
-                </div> 
-                <div id="eventItemsList" class="space-y-4 pb-10"></div>`; 
-            document.getElementById('itemDate').valueAsDate = new Date(); 
-            window.renderSplitCalendar(); 
-            window.renderEventItems(); 
-        };
+                    </div>
+                </div>
+                <div id="eventItemsList" class="space-y-4 pb-10"></div>
+            `;
 
-        window.handleLeaveEventClick = function() { 
-            window.askConfirm("離開計畫？", "將從您的手機移除，不影響其他成員。", () => { 
-                window.splitEvents = window.splitEvents.filter(e => e.id !== window.currentEventId); 
-                window.saveToData(); 
-                window.showSplitHome(); 
-            }); 
-        };
+            const inner = document.getElementById('eventDetailInner');
+            inner.innerHTML = `
+                <div class="bg-emerald-600 rounded-[2.8rem] p-8 mb-6 text-white text-center shadow-md relative">
+                    <h2 class="text-3xl font-black mb-2 flex items-center justify-center gap-2">
+                        <span>${event.name}</span>
+                        <button onclick="window.editEventName()" class="text-emerald-300 text-2xl active:scale-90 transition-all">✏️</button>
+                    </h2>
+                    <p class="text-emerald-100 text-[11px] mb-6 font-bold">${event.members.join(' • ')}</p>
+                    ${event.isCloud ? `<div class="flex justify-center gap-3">
+                        <button onclick='window.copyId("${event.id}")' class='flex-1 py-3 bg-white/20 hover:bg-white/30 rounded-xl text-[10px] font-bold active:scale-95 transition-all'>📋 複製代碼</button>
+                        <button onclick='window.showQRModal("${event.id}")' class='flex-1 py-3 bg-white/20 hover:bg-white/30 rounded-xl text-[10px] font-bold active:scale-95 transition-all'>📱 QR Code</button>
+                    </div>` : ''}
+                </div>
 
-        window.handleDeleteCloudEventClick = function() { 
-            window.askConfirm("徹底刪除雲端計畫？", "將永久刪除所有資料！其他成員也將無法查看。", async () => { 
-                if(window.db) { 
-                    try { 
-                        const ref = window.doc(window.db, "artifacts", window.appId, "public", "data", "splitEvents", String(window.currentEventId)); 
-                        await window.setDoc(ref, { isDeleted: true }, { merge: true }); 
-                        await window.deleteDoc(ref); 
-                    } catch(e) {} 
-                } 
-                window.splitEvents = window.splitEvents.filter(e => e.id !== window.currentEventId); 
-                window.saveToData(); 
-                window.showSplitHome(); 
-            }); 
-        };
+                <!-- 💡 雙分頁切換按鈕 -->
+                <div class="flex bg-slate-200/50 dark:bg-slate-800/50 rounded-[1.8rem] p-1.5 mb-6 shadow-inner">
+                    <button onclick="window.setSplitDetailTab('overview')" class="flex-1 py-4 text-[11px] uppercase font-bold rounded-[1.2rem] transition-all ${window.splitDetailTab === 'overview' ? 'bg-white dark:bg-slate-700 text-emerald-600 dark:text-emerald-400 shadow-sm' : 'text-slate-500 dark:text-slate-400'}">📊 概覽 (Overview)</button>
+                    <button onclick="window.setSplitDetailTab('expenses')" class="flex-1 py-4 text-[11px] uppercase font-bold rounded-[1.2rem] transition-all ${window.splitDetailTab === 'expenses' ? 'bg-white dark:bg-slate-700 text-emerald-600 dark:text-emerald-400 shadow-sm' : 'text-slate-500 dark:text-slate-400'}">🧾 明細 (Expenses)</button>
+                </div>
 
-        window.showSplitHome = function() { 
-            document.getElementById('eventDetailSection').classList.add('hidden'); 
-            document.getElementById('splitHome').classList.remove('hidden'); 
-            if(window.unsubscribeCloud) { window.unsubscribeCloud(); window.unsubscribeCloud = null; } 
-            window.renderEventList(); 
-        };
+                <div id="splitTabContent">
+                    ${window.splitDetailTab === 'overview' ? overviewHtml : expensesHtml}
+                </div>
+            `;
 
-        window.showCreateEvent = function() { 
-            document.getElementById('splitHome').classList.add('hidden'); 
-            document.getElementById('createEventSection').classList.remove('hidden'); 
-            const list = document.getElementById('memberInputsList'); 
-            list.innerHTML = ''; 
-            window.addMemberInputRow("我"); 
-            window.addMemberInputRow(); 
-        };
-
-        window.hideCreateEvent = function() { 
-            document.getElementById('createEventSection').classList.add('hidden'); 
-            document.getElementById('splitHome').classList.remove('hidden'); 
-        };
-
-        window.addMemberInputRow = function(v = "") { 
-            const d = document.createElement('div'); 
-            d.className = "flex items-center gap-3 animate-pop"; 
-            d.innerHTML = `<input type="text" class="m-input flex-1 px-5 py-4 bg-white dark:bg-slate-800 border-2 border-slate-50 dark:border-slate-700 rounded-[1.2rem] text-sm font-bold text-center dark:text-white" value="${v}" placeholder="名字"><button onclick="this.parentElement.remove()" class="text-slate-200 p-2">✕</button>`; 
-            document.getElementById('memberInputsList').appendChild(d); 
-        };
-
-        window.createNewEvent = async function() { 
-            const n = document.getElementById('newEventName').value.trim();
-            const m = Array.from(document.querySelectorAll('.m-input')).map(i => i.value.trim()).filter(x => x); 
-            if (!n || m.length < 2) return window.showToast("資料不全，請輸入名稱與至少兩位成員"); 
-            
-            // 💡 權限標記：建立者擁有 isOwner: true 的權限
-            const newEvt = { id: Date.now(), name: n, members: m, items: [], date: new Date().toLocaleDateString(), isCloud: !!window.db, isOwner: true }; 
-            window.splitEvents.unshift(newEvt); 
-            
-            if(window.db && window.auth && window.auth.currentUser) { 
-                try { 
-                    await window.setDoc(window.doc(window.db, "artifacts", window.appId, "public", "data", "splitEvents", String(newEvt.id)), newEvt); 
-                } catch(e) {} 
-            } 
-            
-            window.saveToData(); 
-            window.hideCreateEvent(); 
-            window.renderEventList();
-            window.showToast("✅ 計畫已建立！"); 
-        };
-
-        window.joinCloudEvent = async function(joinId) { 
-            let id = "";
-            if (typeof joinId === 'string' && joinId) {
-                id = joinId.trim();
-            } else {
-                id = document.getElementById('cloudIdInput').value.trim();
-            }
-
-            if(!id || !window.db) return window.showToast("連線中..."); 
-            try { 
-                await window.firebaseInitPromise; 
-                const docSnap = await window.getDoc(window.doc(window.db, "artifacts", window.appId, "public", "data", "splitEvents", id)); 
-                if(docSnap.exists()){ 
-                    const data = docSnap.data(); 
-                    if(data.isDeleted) return window.showToast("計畫已被刪除 ❌"); 
-                    const idx = window.splitEvents.findIndex(e => e.id === data.id); 
-                    if(idx !== -1) {
-                        const wasOwner = window.splitEvents[idx].isOwner;
-                        window.splitEvents[idx] = data; 
-                        window.splitEvents[idx].isOwner = wasOwner !== false;
-                    } else { 
-                        data.isOwner = false; // 加入者預設為非建立者
-                        window.splitEvents.unshift(data); 
-                    }
-                    window.saveToData(); window.renderEventList(); window.showToast("加入計畫成功！"); 
-                } else window.showToast("找不到計畫 ❌"); 
-            } catch (e) { window.showToast("讀取失敗 ❌"); } 
-        };
-
-        window.changeSplitMonth = function(s) { 
-            window.splitCalendarDate.setMonth(window.splitCalendarDate.getMonth() + s); 
-            window.renderSplitCalendar(); 
-        };
-
-        window.setSplitView = function(mode) { 
-            window.splitViewMode = mode; 
-            window.renderSplitCalendar(); 
-            window.renderEventItems(); 
-        };
-
-        window.renderSplitCalendar = function() { 
-            const event = window.splitEvents.find(e => e.id === window.currentEventId);
-            const c = document.getElementById('splitCalendarDays');
-            const md = document.getElementById('splitMonthDisplay'); 
-            if(!c || !event) return; 
-            const y = window.splitCalendarDate.getFullYear();
-            const m = window.splitCalendarDate.getMonth(); 
-            md.innerText = `${y}年 ${m + 1}月`; 
-            c.innerHTML = ''; 
-            const f = new Date(y, m, 1).getDay();
-            const dInM = new Date(y, m + 1, 0).getDate(); 
-            for (let i = 0; i < f; i++) c.innerHTML += `<div></div>`; 
-            for (let d = 1; d <= dInM; d++) { 
-                const ds = new Date(y, m, d).toDateString(); 
-                let net = (event.items || []).filter(i => new Date(i.date).toDateString() === ds).reduce((sum, i) => sum + i.amount, 0); 
-                const div = document.createElement('div'); 
-                div.className = `calendar-day hover:bg-emerald-50 dark:hover:bg-slate-800 ${ds === window.currentSplitDateStr && window.splitViewMode === 'day' ? 'split-selected' : ''}`; 
-                div.onclick = () => { 
-                    window.currentSplitDateStr = ds; window.splitViewMode = 'day'; window.renderSplitCalendar(); window.renderEventItems(); 
-                }; 
-                let sumHTML = net !== 0 ? `<span class="text-[7px] font-black mt-0.5 ${ds === window.currentSplitDateStr && window.splitViewMode === 'day' ? 'text-white' : 'text-red-500'}">$${Math.round(net)}</span>` : ''; 
-                div.innerHTML = `<span class="${ds === window.currentSplitDateStr && window.splitViewMode === 'day' ? '' : 'text-slate-600'}">${d}</span>${sumHTML}`; 
-                c.appendChild(div); 
-            } 
-        };
-
-        // 💡 修復: 編輯與新增分帳項目
-        window.addItemToEvent = async function() { 
-            let d = document.getElementById('itemDesc').value.trim() || '共同開支'; 
-            const a = parseFloat(document.getElementById('itemAmount').value);
-            const p = document.getElementById('itemPayer').value;
-            const dateVal = document.getElementById('itemDate').value;
-            const pts = Array.from(document.querySelectorAll('input[name="part_check"]:checked')).map(i => i.value); 
-            const editId = document.getElementById('editingSplitItemId')?.value;
-            
-            if(!a || a <= 0 || pts.length === 0) return window.showToast("資料不全"); 
-            if (window.splitForeignText) d += ` (${window.splitForeignText})`; 
-            
-            const event = window.splitEvents.find(e => e.id === window.currentEventId); 
-            
-            if(editId) {
-                const idx = event.items.findIndex(i => i.id == editId);
-                if(idx !== -1) {
-                    event.items[idx] = { id: Number(editId), desc: d, amount: a, payer: p, participants: pts, date: dateVal };
-                }
-            } else {
-                event.items.unshift({ id: Date.now(), desc: d, amount: a, payer: p, participants: pts, date: dateVal }); 
-            }
-            
-            if(event.isCloud && window.db) { 
-                try { await window.setDoc(window.doc(window.db, "artifacts", window.appId, "public", "data", "splitEvents", String(event.id)), event); } catch(e) {} 
-            } 
-            window.saveToData(); 
-            window.splitForeignText = ""; 
-            window.resetSplitForm();
-            window.renderSplitCalendar(); 
-            window.renderEventItems(); 
-            window.showToast(editId ? "已修改紀錄 ✨" : "已入帳 💰"); 
-        };
-
-        // 💡 修復: 重置分帳表單
-        window.resetSplitForm = function() {
-            document.getElementById('itemDesc').value = ''; 
-            document.getElementById('itemAmount').value = ''; 
-            document.getElementById('itemDate').valueAsDate = new Date();
-            
-            const checkboxes = document.querySelectorAll('input[name="part_check"]');
-            checkboxes.forEach(cb => cb.checked = true);
-
-            const editIdField = document.getElementById('editingSplitItemId');
-            if(editIdField) editIdField.value = '';
-            
-            const addBtn = document.getElementById('addSplitBtn');
-            if(addBtn) addBtn.innerText = "確定入帳";
-            
-            const cancelBtn = document.getElementById('cancelSplitEditBtn');
-            if(cancelBtn) cancelBtn.classList.add('hidden');
-            
-            const disp = document.getElementById('splitForeignDisplay');
-            if(disp) { disp.innerText = ""; disp.classList.add('hidden'); }
-        };
-
-        // 💡 修復: 讀取欲修改的分帳項目
-        window.editSplitItem = function(itemId) {
-            const event = window.splitEvents.find(e => e.id === window.currentEventId);
-            if (!event) return;
-            const item = event.items.find(i => i.id === itemId);
-            if (!item) return;
-
-            document.getElementById('itemDesc').value = item.desc;
-            document.getElementById('itemAmount').value = item.amount;
-            document.getElementById('itemPayer').value = item.payer;
-            document.getElementById('itemDate').value = item.date || new Date().toISOString().split('T')[0];
-            
-            const checkboxes = document.querySelectorAll('input[name="part_check"]');
-            checkboxes.forEach(cb => {
-                cb.checked = item.participants.includes(cb.value);
-            });
-
-            document.getElementById('editingSplitItemId').value = item.id;
-            document.getElementById('addSplitBtn').innerText = "確認修改";
-            document.getElementById('cancelSplitEditBtn').classList.remove('hidden');
-
-            document.getElementById('itemDesc').scrollIntoView({ behavior: 'smooth', block: 'center' });
-        };
-
-        window.deleteSplitItem = function(itemId) {
-            window.askConfirm("刪除此紀錄？", "此操作無法復原。", async () => {
-                const event = window.splitEvents.find(e => e.id === window.currentEventId);
-                if(!event) return;
-                event.items = event.items.filter(i => i.id !== itemId);
-                if(event.isCloud && window.db) {
-                    try { await window.setDoc(window.doc(window.db, "artifacts", window.appId, "public", "data", "splitEvents", String(event.id)), event); } catch(e) {}
-                }
-                window.saveToData();
+            if (window.splitDetailTab === 'expenses') {
+                if(!document.getElementById('itemDate').value) document.getElementById('itemDate').valueAsDate = new Date();
                 window.renderSplitCalendar();
-                window.renderEventItems();
-                window.showToast("已刪除 🗑️");
-            });
+                window.renderEventItemsListOnly();
+            }
         };
 
-        window.renderEventItems = function() { 
+        window.setSplitDetailTab = function(tab) {
+            window.splitDetailTab = tab;
+            window.renderEventDetail();
+        };
+
+        window.renderEventItemsListOnly = function() {
             const event = window.splitEvents.find(e => e.id === window.currentEventId);
             const list = document.getElementById('eventItemsList');
-            const sett = document.getElementById('eventSettlement'); 
-            if(!list || !sett) return; 
-            list.innerHTML = ''; 
-            let balances = {}; 
-            event.members.forEach(m => balances[m] = 0); 
-            (event.items || []).forEach(item => { 
-                const share = item.amount / item.participants.length; balances[item.payer] += item.amount; item.participants.forEach(p => balances[p] -= share); 
-            }); 
-            let displayItems = event.items || []; 
-            if (window.splitViewMode === 'day') displayItems = displayItems.filter(i => new Date(i.date).toDateString() === window.currentSplitDateStr); 
+            if(!list) return;
+            list.innerHTML = '';
+            let displayItems = event.items || [];
+            if (window.splitViewMode === 'day') displayItems = displayItems.filter(i => new Date(i.date).toDateString() === window.currentSplitDateStr);
             if (displayItems.length === 0) {
-                list.innerHTML = `<div class="py-10 text-slate-300 text-xs italic text-center">該日無消費紀錄</div>`; 
-            } else { 
-                displayItems.forEach(item => { 
-                    const div = document.createElement('div'); 
-                    div.className = "bg-white dark:bg-slate-800 p-6 rounded-[2rem] flex justify-between items-center mb-4 shadow-sm"; 
-                    // 💡 修復: 加上了「修改」與「刪除」按鈕
+                list.innerHTML = `<div class="py-10 text-slate-300 text-xs italic text-center">該日無消費紀錄</div>`;
+            } else {
+                displayItems.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = "bg-white dark:bg-slate-800 p-6 rounded-[2rem] flex justify-between items-center mb-4 shadow-sm border border-slate-100 dark:border-slate-700";
                     div.innerHTML = `
-                        <div class="flex-1 min-w-0">
+                        <div class="flex-1 min-w-0 text-left">
                             <p class="font-black text-slate-800 dark:text-white text-sm truncate">${item.desc}</p>
                             <p class="text-[9px] text-slate-400 font-bold mt-1 truncate">${item.date || ''} • 墊付: ${item.payer}</p>
                         </div>
@@ -1513,68 +846,54 @@
                                 <button onclick="window.editSplitItem(${item.id})" class="text-sky-500 text-[10px] font-black uppercase bg-sky-50 dark:bg-sky-900/30 px-3 py-1 rounded-lg active:scale-90 transition-all border border-sky-100 dark:border-sky-800 shadow-sm">修改</button>
                                 <button onclick="window.deleteSplitItem(${item.id})" class="text-red-400 text-[10px] font-black uppercase bg-red-50 dark:bg-red-900/30 px-3 py-1 rounded-lg active:scale-90 transition-all border border-red-100 dark:border-red-800 shadow-sm">刪除</button>
                             </div>
-                        </div>`; 
-                    list.appendChild(div); 
-                }); 
-            } 
-            let html = `<h4 class="font-black text-[12px] text-emerald-600 uppercase mb-4 border-b border-emerald-50 pb-2">${event.name} - 結算</h4><div class="grid grid-cols-2 gap-3 mb-6">`; 
-            event.members.forEach(m => { 
-                const b = balances[m]; 
-                html += `<div class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl text-center shadow-sm"><p class="text-[8px] font-black text-slate-300 uppercase mb-1">${m}</p><p class="font-black text-sm ${b >= 0 ? 'text-emerald-500' : 'text-red-500'}">${b >= 0 ? '+' : ''}${b.toFixed(2)}</p></div>`; 
-            }); 
-            html += `</div>`; 
-            let tempD = [], tempC = []; 
-            Object.keys(balances).forEach(m => { 
-                if(balances[m] < -0.01) tempD.push({n: m, a: -balances[m]}); 
-                else if(balances[m] > 0.01) tempC.push({n: m, a: balances[m]}); 
-            }); 
-            while(tempD.length && tempC.length) { 
-                let pay = Math.min(tempD[0].a, tempC[0].a); 
-                html += `<div class="text-[11px] p-4 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 rounded-2xl border border-emerald-100/50 mb-2 text-left shadow-sm">💰 <b class="font-black">${tempD[0].n}</b> 應付給 <b class="font-black">${tempC[0].n}</b> $${pay.toFixed(2)}</div>`; 
-                tempD[0].a -= pay; tempC[0].a -= pay; 
-                if(tempD[0].a <= 0.01) tempD.shift(); 
-                if(tempC[0].a <= 0.01) tempC.shift(); 
-            } 
-            sett.innerHTML = html || '<p class="text-slate-300 text-xs">All Settled ✨</p>'; 
+                        </div>`;
+                    list.appendChild(div);
+                });
+            }
         };
 
-        window.editEventName = function() { 
-            const event = window.splitEvents.find(e => e.id === window.currentEventId); 
-            if (!event) return; 
-            window.showInputModal("修改計畫", "請輸入新的計畫名稱", "計畫標題", event.name, "text", (newName) => {
-                if (newName && newName.trim()) { 
-                    event.name = newName.trim(); 
-                    if(event.isCloud && window.db) window.setDoc(window.doc(window.db, "artifacts", window.appId, "public", "data", "splitEvents", String(event.id)), event); 
-                    window.saveToData(); 
-                    window.openEventDetail(window.currentEventId); 
-                } 
-            });
+        window.handleLeaveEventClick = function() { window.askConfirm("離開計畫？", "將從您的手機移除，不影響其他成員。", () => { window.splitEvents = window.splitEvents.filter(e => e.id !== window.currentEventId); window.saveToData(); window.showSplitHome(); }); };
+        window.handleDeleteCloudEventClick = function() { window.askConfirm("徹底刪除雲端計畫？", "將永久刪除所有資料！其他成員也將無法查看。", async () => { if(window.db) { try { const ref = window.doc(window.db, "artifacts", window.appId, "public", "data", "splitEvents", String(window.currentEventId)); await window.setDoc(ref, { isDeleted: true }, { merge: true }); await window.deleteDoc(ref); } catch(e) {} } window.splitEvents = window.splitEvents.filter(e => e.id !== window.currentEventId); window.saveToData(); window.showSplitHome(); }); };
+        window.showSplitHome = function() { document.getElementById('eventDetailSection').classList.add('hidden'); document.getElementById('splitHome').classList.remove('hidden'); if(window.unsubscribeCloud) { window.unsubscribeCloud(); window.unsubscribeCloud = null; } window.renderEventList(); };
+        
+        window.showCreateEvent = function() { document.getElementById('splitHome').classList.add('hidden'); document.getElementById('createEventSection').classList.remove('hidden'); const list = document.getElementById('memberInputsList'); list.innerHTML = ''; window.addMemberInputRow("我"); window.addMemberInputRow(""); };
+        window.hideCreateEvent = function() { document.getElementById('createEventSection').classList.add('hidden'); document.getElementById('splitHome').classList.remove('hidden'); };
+        window.addMemberInputRow = function(v = "") { const d = document.createElement('div'); d.className = "flex items-center gap-3 animate-pop"; d.innerHTML = `<input type="text" class="m-input flex-1 px-5 py-4 bg-white dark:bg-slate-800 border-2 border-slate-50 dark:border-slate-700 rounded-[1.2rem] text-sm font-bold text-center dark:text-white" value="${v}" placeholder="名字"><button onclick="this.parentElement.remove()" class="text-slate-200 p-2">✕</button>`; document.getElementById('memberInputsList').appendChild(d); };
+        window.createNewEvent = async function() { const n = document.getElementById('newEventName').value.trim(), m = Array.from(document.querySelectorAll('.m-input')).map(i => i.value.trim()).filter(x => x); if (!n || m.length < 2) return window.showToast("資料不全，請輸入名稱與至少兩位成員"); const newEvt = { id: Date.now(), name: n, members: m, items: [], date: new Date().toLocaleDateString(), isCloud: !!window.db, isOwner: true }; window.splitEvents.unshift(newEvt); if(window.db && window.auth && window.auth.currentUser) { try { await window.setDoc(window.doc(window.db, "artifacts", window.appId, "public", "data", "splitEvents", String(newEvt.id)), newEvt); } catch(e) {} } window.saveToData(); window.hideCreateEvent(); window.renderEventList(); window.showToast("✅ 計畫已建立！"); };
+        window.joinCloudEvent = async function(joinId) { let id = ""; if (typeof joinId === 'string' && joinId) { id = joinId.trim(); } else { id = document.getElementById('cloudIdInput').value.trim(); } if(!id || !window.db) return window.showToast("連線中..."); try { await window.firebaseInitPromise; const docSnap = await window.getDoc(window.doc(window.db, "artifacts", window.appId, "public", "data", "splitEvents", id)); if(docSnap.exists()){ const data = docSnap.data(); if(data.isDeleted) return window.showToast("計畫已被刪除 ❌"); const idx = window.splitEvents.findIndex(e => e.id === data.id); if(idx !== -1) { const wasOwner = window.splitEvents[idx].isOwner; window.splitEvents[idx] = data; window.splitEvents[idx].isOwner = wasOwner !== false; } else { data.isOwner = false; window.splitEvents.unshift(data); } window.saveToData(); window.renderEventList(); window.showToast("加入計畫成功！"); } else window.showToast("找不到計畫 ❌"); } catch (e) { window.showToast("讀取失敗 ❌"); } };
+        
+        window.changeSplitMonth = function(s) { window.splitCalendarDate.setMonth(window.splitCalendarDate.getMonth() + s); window.renderSplitCalendar(); };
+        
+        window.setSplitView = function(mode) { 
+            window.splitViewMode = mode; 
+            window.renderSplitCalendar(); 
+            window.renderEventItemsListOnly(); 
+            
+            const btnAll = document.querySelector('button[onclick="window.setSplitView(\'all\')"]');
+            const btnDay = document.querySelector('button[onclick="window.setSplitView(\'day\')"]');
+            if(btnAll && btnDay) {
+                if (window.splitViewMode === 'all') {
+                    btnAll.className = "flex-1 py-3 rounded-2xl text-[10px] font-black uppercase bg-emerald-500 text-white border-transparent shadow-sm transition-all";
+                    btnDay.className = "flex-1 py-3 rounded-2xl text-[10px] font-black uppercase bg-white dark:bg-slate-800 text-slate-400 border border-slate-200 dark:border-slate-700 shadow-sm transition-all";
+                } else {
+                    btnDay.className = "flex-1 py-3 rounded-2xl text-[10px] font-black uppercase bg-emerald-500 text-white border-transparent shadow-sm transition-all";
+                    btnAll.className = "flex-1 py-3 rounded-2xl text-[10px] font-black uppercase bg-white dark:bg-slate-800 text-slate-400 border border-slate-200 dark:border-slate-700 shadow-sm transition-all";
+                }
+            }
         };
 
-        window.copyId = function(id) { 
-            const el = document.createElement('textarea'); 
-            el.value = id; 
-            document.body.appendChild(el); 
-            el.select(); 
-            document.execCommand('copy'); 
-            document.body.removeChild(el); 
-            window.showToast("ID 已複製 ✨"); 
-        };
-
-        window.exportSettlementImage = function() { 
-            const node = document.getElementById('eventSettlement'); 
-            if(!node) return; 
-            window.showToast("生成圖片中..."); 
-            html2canvas(node, { backgroundColor: "#ffffff", scale: 2 }).then(canvas => { 
-                const link = document.createElement('a'); 
-                link.download = `Settlement.png`; 
-                link.href = canvas.toDataURL(); 
-                link.click(); window.showToast("已下載 ✨"); 
-            }); 
-        };
+        window.renderSplitCalendar = function() { const event = window.splitEvents.find(e => e.id === window.currentEventId), c = document.getElementById('splitCalendarDays'), md = document.getElementById('splitMonthDisplay'); if(!c || !event) return; const y = window.splitCalendarDate.getFullYear(), m = window.splitCalendarDate.getMonth(); md.innerText = `${y}年 ${m + 1}月`; c.innerHTML = ''; const f = new Date(y, m, 1).getDay(), dInM = new Date(y, m + 1, 0).getDate(); for (let i = 0; i < f; i++) c.innerHTML += `<div></div>`; for (let d = 1; d <= dInM; d++) { const ds = new Date(y, m, d).toDateString(); let net = (event.items || []).filter(i => new Date(i.date).toDateString() === ds).reduce((sum, i) => sum + i.amount, 0); const div = document.createElement('div'); div.className = `calendar-day hover:bg-emerald-50 dark:hover:bg-slate-800 ${ds === window.currentSplitDateStr && window.splitViewMode === 'day' ? 'split-selected' : ''}`; div.onclick = () => { window.currentSplitDateStr = ds; window.splitViewMode = 'day'; window.renderSplitCalendar(); window.renderEventItemsListOnly(); }; let sumHTML = net !== 0 ? `<span class="text-[7px] font-black mt-0.5 ${ds === window.currentSplitDateStr && window.splitViewMode === 'day' ? 'text-white' : 'text-red-500'}">$${Math.round(net)}</span>` : ''; div.innerHTML = `<span class="${ds === window.currentSplitDateStr && window.splitViewMode === 'day' ? '' : 'text-slate-600'}">${d}</span>${sumHTML}`; c.appendChild(div); } };
+        
+        window.addItemToEvent = async function() { let d = document.getElementById('itemDesc').value.trim() || '共同開支'; const a = parseFloat(document.getElementById('itemAmount').value), p = document.getElementById('itemPayer').value, dateVal = document.getElementById('itemDate').value, pts = Array.from(document.querySelectorAll('input[name="part_check"]:checked')).map(i => i.value), editId = document.getElementById('editingSplitItemId')?.value; if(!a || a <= 0 || pts.length === 0) return window.showToast("資料不全"); if (window.splitForeignText) d += ` (${window.splitForeignText})`; const event = window.splitEvents.find(e => e.id === window.currentEventId); if(editId) { const idx = event.items.findIndex(i => i.id == editId); if(idx !== -1) { event.items[idx] = { id: Number(editId), desc: d, amount: a, payer: p, participants: pts, date: dateVal }; } } else { event.items.unshift({ id: Date.now(), desc: d, amount: a, payer: p, participants: pts, date: dateVal }); } if(event.isCloud && window.db) { try { await window.setDoc(window.doc(window.db, "artifacts", window.appId, "public", "data", "splitEvents", String(event.id)), event); } catch(e) {} } window.saveToData(); window.splitForeignText = ""; window.resetSplitForm(); window.renderSplitCalendar(); window.renderEventItemsListOnly(); window.showToast(editId ? "已修改紀錄 ✨" : "已入帳 💰"); };
+        window.resetSplitForm = function() { document.getElementById('itemDesc').value = ''; document.getElementById('itemAmount').value = ''; document.getElementById('itemDate').valueAsDate = new Date(); document.querySelectorAll('input[name="part_check"]').forEach(cb => cb.checked = true); const editIdField = document.getElementById('editingSplitItemId'); if(editIdField) editIdField.value = ''; const addBtn = document.getElementById('addSplitBtn'); if(addBtn) addBtn.innerText = "確定入帳"; const cancelBtn = document.getElementById('cancelSplitEditBtn'); if(cancelBtn) cancelBtn.classList.add('hidden'); const disp = document.getElementById('splitForeignDisplay'); if(disp) { disp.innerText = ""; disp.classList.add('hidden'); } };
+        window.editSplitItem = function(itemId) { const event = window.splitEvents.find(e => e.id === window.currentEventId); if (!event) return; const item = event.items.find(i => i.id === itemId); if (!item) return; document.getElementById('itemDesc').value = item.desc; document.getElementById('itemAmount').value = item.amount; document.getElementById('itemPayer').value = item.payer; document.getElementById('itemDate').value = item.date || new Date().toISOString().split('T')[0]; document.querySelectorAll('input[name="part_check"]').forEach(cb => { cb.checked = item.participants.includes(cb.value); }); document.getElementById('editingSplitItemId').value = item.id; document.getElementById('addSplitBtn').innerText = "確認修改"; document.getElementById('cancelSplitEditBtn').classList.remove('hidden'); document.getElementById('itemDesc').scrollIntoView({ behavior: 'smooth', block: 'center' }); };
+        window.deleteSplitItem = function(itemId) { window.askConfirm("刪除此紀錄？", "此操作無法復原。", async () => { const event = window.splitEvents.find(e => e.id === window.currentEventId); if(!event) return; event.items = event.items.filter(i => i.id !== itemId); if(event.isCloud && window.db) { try { await window.setDoc(window.doc(window.db, "artifacts", window.appId, "public", "data", "splitEvents", String(event.id)), event); } catch(e) {} } window.saveToData(); window.renderSplitCalendar(); window.renderEventItemsListOnly(); window.showToast("已刪除 🗑️"); }); };
+        window.editEventName = function() { const event = window.splitEvents.find(e => e.id === window.currentEventId); if (!event) return; window.showInputModal("修改計畫", "請輸入新的計畫名稱", "計畫標題", event.name, "text", (newName) => { if (newName && newName.trim()) { event.name = newName.trim(); if(event.isCloud && window.db) window.setDoc(window.doc(window.db, "artifacts", window.appId, "public", "data", "splitEvents", String(event.id)), event); window.saveToData(); window.openEventDetail(window.currentEventId); } }); };
+        window.copyId = function(id) { const el = document.createElement('textarea'); el.value = id; document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el); window.showToast("ID 已複製 ✨"); };
+        window.exportSettlementImage = function() { const node = document.getElementById('eventSettlement'); if(!node) return; window.showToast("生成圖片中..."); html2canvas(node, { backgroundColor: "#ffffff", scale: 2 }).then(canvas => { const link = document.createElement('a'); link.download = `Settlement.png`; link.href = canvas.toDataURL(); link.click(); window.showToast("已下載 ✨"); }); };
 
         window.startApp = function() {
-            window.sections = { expense: document.getElementById('sectionExpense'), recurring: document.getElementById('sectionRecurring'), split: document.getElementById('sectionSplit') };
+            window.sections = { expense: document.getElementById('sectionExpense'), recurring: document.getElementById('sectionRecurring'), split: document.getElementById('sectionSplit'), currency: document.getElementById('sectionCurrency') };
             const ys = document.getElementById('yearSelect'), ms = document.getElementById('monthSelect'), curY = new Date().getFullYear();
             for(let i = curY - 5; i <= curY + 5; i++) { ys.innerHTML += `<option value="${i}">${i}年</option>`; }
             for(let i = 0; i < 12; i++) { ms.innerHTML += `<option value="${i}">${i+1}月</option>`; }
@@ -1582,23 +901,10 @@
             const mIn = document.getElementById('monthlySalaryInput'), yIn = document.getElementById('yearlySalaryInput');
             if(mIn) mIn.value = window.userSalary.monthly || ""; if(yIn) yIn.value = window.userSalary.yearly || "";
             
-            window.updateTargetDateUI(); 
-            window.renderPersonalApp(); 
-            window.renderRecurringApp(); 
-            window.renderEventList(); 
-            window.renderCalendar(); 
-            window.refreshCategoryOptions(); 
-            window.fetchExchangeRates();
-            
+            window.updateTargetDateUI(); window.renderPersonalApp(); window.renderRecurringApp(); window.renderEventList(); window.renderCalendar(); window.refreshCategoryOptions(); window.fetchExchangeRates();
             const urlParams = new URLSearchParams(window.location.search), joinId = urlParams.get('join');
-            if (joinId) { 
-                window.history.replaceState({}, document.title, window.location.pathname); 
-                window.switchTab('split'); 
-                document.getElementById('cloudIdInput').value = joinId; 
-                setTimeout(() => { window.askConfirm("加入計畫？", `代碼 ${joinId}`, () => window.joinCloudEvent(joinId)); }, 1000); 
-            }
+            if (joinId) { window.history.replaceState({}, document.title, window.location.pathname); window.switchTab('split'); document.getElementById('cloudIdInput').value = joinId; setTimeout(() => { window.askConfirm("加入計畫？", `代碼 ${joinId}`, () => window.joinCloudEvent(joinId)); }, 1000); }
         };
-
         window.startApp();
     </script>
 </body>
