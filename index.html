@@ -44,7 +44,7 @@
         window.signInWithEmailAndPassword = signInWithEmailAndPassword;
         window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
         window.signOut = signOut;
-        window.updatePassword = updatePassword; // 💡 匯入修改密碼功能
+        window.updatePassword = updatePassword; 
         window.setDoc = setDoc; window.getDoc = getDoc; window.doc = doc; window.collection = collection; window.onSnapshot = onSnapshot; window.deleteDoc = deleteDoc;
 
         try {
@@ -107,7 +107,7 @@
     <!-- 💡 AI 處理中的全螢幕載入畫面 -->
     <div id="aiLoadingOverlay" class="fixed inset-0 z-[8000] bg-slate-900/80 backdrop-blur-sm hidden flex-col items-center justify-center">
         <div class="animate-spin text-4xl mb-4">⏳</div>
-        <p class="text-white font-bold tracking-widest text-sm">AI 大廚分析中...</p>
+        <p class="text-white font-bold tracking-widest text-sm">AI 運行中... 📸</p>
         <p class="text-slate-400 text-xs mt-2">請稍候，可能需要數秒鐘</p>
     </div>
 
@@ -220,12 +220,12 @@
                 
                 <button onclick="window.handleResetApp()" class="w-full py-3 bg-rose-50 dark:bg-rose-900/20 text-rose-600 border border-rose-100 dark:border-rose-900 font-black rounded-2xl text-[9px] uppercase active:bg-rose-500 active:text-white transition-all mt-4">⚠️ 清空所有數據</button>
                 
-                <!-- 💡 Logo 與版本號回歸 -->
+                <!-- Logo 與版本號 -->
                 <div class="pt-6 pb-2 flex flex-col items-center justify-center opacity-40 pointer-events-none">
                     <div class="w-10 h-10 bg-slate-200 dark:bg-slate-700 rounded-full flex items-center justify-center mb-2 shadow-inner">
                         <span class="text-xl">💸</span>
                     </div>
-                    <p class="text-[9px] font-black tracking-widest uppercase dark:text-slate-400">Version 46.1</p>
+                    <p class="text-[9px] font-black tracking-widest uppercase dark:text-slate-400">Version 47.0</p>
                 </div>
             </div>
         </div>
@@ -313,7 +313,17 @@
                     <button id="cancelEditBtn" onclick="window.resetForm()" class="w-full bg-slate-100 dark:bg-slate-800 text-slate-400 font-bold py-4 rounded-[1.5rem] text-[10px] uppercase hidden">取消修改</button>
                 </div>
             </div>
-            <div id="expenseList" class="space-y-4 pb-10 text-left"></div>
+
+            <!-- 💡 恢復：分析圖表區域 -->
+            <div id="reportSection" class="hidden glass-card rounded-[2.8rem] p-8 border-2 border-slate-50 dark:border-slate-800 text-left animate-pop mt-6">
+                <h4 id="reportTitle" class="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-6 italic">財務數據分析</h4>
+                <div class="flex flex-col md:flex-row gap-8 items-center">
+                    <div class="w-44 h-44 relative"><canvas id="expenseChart"></canvas></div>
+                    <div id="reportContent" class="flex-1 space-y-2 w-full"></div>
+                </div>
+            </div>
+
+            <div id="expenseList" class="space-y-4 pb-10 text-left mt-6"></div>
         </div>
 
         <!-- 2. 年度定期視圖 -->
@@ -479,6 +489,7 @@
         window.personalForeignText = "";
         window.splitForeignText = "";
         window.isSyncingFromCloud = false;
+        window.myChart = null;
 
         window.reloadLocalVars();
 
@@ -510,7 +521,6 @@
             window.showToast("已登出帳號");
         };
 
-        // 💡 新增：修改雲端密碼功能
         window.changeAccPassword = function() {
             window.showInputModal("修改密碼", "請輸入新密碼 (至少6位數)", "新密碼", "", "password", async (newPwd) => {
                 if(!newPwd || newPwd.length < 6) return window.showToast("密碼太短 ❌");
@@ -616,7 +626,6 @@
             window.closeCamera(); window.processAIOCR(base64);
         };
 
-        // 💡 修正相簿上載沒有反應的問題
         window.handleGalleryUpload = function(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -626,7 +635,6 @@
                 return window.showToast("請在⚙️設定中輸入 API Key");
             }
             
-            // 顯示 Loading 畫面
             document.getElementById('aiLoadingOverlay').classList.replace('hidden', 'flex');
             
             const reader = new FileReader();
@@ -647,27 +655,50 @@
                 img.src = e.target.result;
             };
             reader.readAsDataURL(file);
-            event.target.value = ''; // Reset input
+            event.target.value = ''; 
         };
 
         window.processAIOCR = async function(base64) {
             document.getElementById('aiLoadingOverlay').classList.replace('hidden', 'flex');
             const apiKey = localStorage.getItem('gemini_api_key');
-            const prompt = "Analyze receipt. Extract Amount(number), Category(string, from:[餐飲,交通,購物,娛樂,醫療,日常]), Merchant(string as remark), Date(YYYY-MM-DD). Output ONLY raw JSON. No markdown. Thinking budget: 0.";
+            
+            // 💡 確保 AI 強制回傳 JSON，避免 Markdown 解析錯誤
+            const prompt = "Analyze this receipt. Extract Amount(number), Category(string, must be exactly one of: '餐飲','交通','購物','娛樂','醫療','日常','其他'), Merchant name (string, mapped to remark), Date (string, format YYYY-MM-DD).";
+            
             try {
                 const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }, { inlineData: { mimeType: "image/jpeg", data: base64 } }] }], generationConfig: { responseMimeType: "application/json", thinkingConfig: { thinkingBudget: 0 } } })
+                    body: JSON.stringify({ 
+                        contents: [{ parts: [{ text: prompt }, { inlineData: { mimeType: "image/jpeg", data: base64 } }] }], 
+                        generationConfig: { 
+                            responseMimeType: "application/json",
+                            responseSchema: {
+                                type: "OBJECT",
+                                properties: {
+                                    amount: { type: "NUMBER" },
+                                    category: { type: "STRING" },
+                                    remark: { type: "STRING" },
+                                    date: { type: "STRING" }
+                                }
+                            }
+                        } 
+                    })
                 });
                 const resJson = await res.json();
                 if (resJson.error) throw new Error(resJson.error.message);
                 
                 const jsonText = resJson.candidates[0].content.parts[0].text;
                 const data = JSON.parse(jsonText);
+                
                 document.getElementById('amountInput').value = data.amount || "";
                 document.getElementById('categoryInput').value = data.category || "其他";
-                document.getElementById('remarkInput').value = data.merchant || data.remark || "";
-                if(data.date){ window.selectedDateStr = new Date(data.date).toDateString(); window.updateTargetDateUI(); window.renderCalendar(); }
+                document.getElementById('remarkInput').value = data.remark || "";
+                
+                if(data.date){ 
+                    window.selectedDateStr = new Date(data.date).toDateString(); 
+                    window.updateTargetDateUI(); 
+                    window.renderCalendar(); 
+                }
                 window.showToast("✅ 辨識成功！");
             } catch(e) { 
                 console.error(e);
@@ -678,8 +709,19 @@
         };
 
         // ==========================================
-        // 5. 核心渲染
+        // 5. 核心渲染與圖表
         // ==========================================
+        window.updateChart = function(data) {
+            const canvas = document.getElementById('expenseChart'); if (!canvas) return;
+            if (window.myChart) window.myChart.destroy();
+            const labels = Object.keys(data); if (labels.length === 0) return;
+            window.myChart = new Chart(canvas.getContext('2d'), {
+                type: 'doughnut',
+                data: { labels: labels, datasets: [{ data: Object.values(data), backgroundColor: ['#38bdf8', '#fbbf24', '#f43f5e', '#10b981', '#818cf8', '#a78bfa'], borderWidth: 0 }] },
+                options: { plugins: { legend: { display: false } }, cutout: '70%', responsive: true, maintainAspectRatio: false }
+            });
+        };
+
         window.renderCurrentView = function() {
             window.renderPersonalApp(); window.renderCalendar(); window.renderRecurringApp(); window.renderEventList();
             if(!document.getElementById('eventDetailSection').classList.contains('hidden')) window.renderEventDetailInner();
@@ -700,9 +742,32 @@
             const list = document.getElementById('expenseList'); if(!list) return; const vy = window.calendarDate.getFullYear(), vm = window.calendarDate.getMonth();
             let fl = window.expenses.filter(i => { const d = new Date(i.dateStr); if(window.expenseFilter === 'day') return i.dateStr === window.selectedDateStr; if(window.expenseFilter === 'month') return d.getMonth() === vm && d.getFullYear() === vy; return d.getFullYear() === vy; });
             let net = 0, totalExp = 0; list.innerHTML = '';
+            
+            // 💡 圖表與報表生成
+            if (window.expenseFilter !== 'day') {
+                document.getElementById('reportSection').classList.remove('hidden');
+                let catSum = {};
+                fl.forEach(i => { if(i.type === 'expense') catSum[i.category] = (catSum[i.category] || 0) + i.amount; });
+                window.recurringExpenses.forEach(r => {
+                    const isInc = r.type === 'income';
+                    if (!isInc) {
+                        const amt = (window.expenseFilter === 'year' && r.freq === 'monthly') ? r.amount * 12 : r.amount;
+                        catSum["定期項目"] = (catSum["定期項目"] || 0) + amt;
+                    }
+                });
+                window.updateChart(catSum);
+                let rHTML = '';
+                Object.keys(catSum).forEach(cat => {
+                    rHTML += `<div class="flex justify-between items-center text-xs font-bold"><span class="text-slate-400">${cat}</span><span class="text-slate-700 dark:text-white">$${catSum[cat].toLocaleString()}</span></div>`;
+                });
+                document.getElementById('reportContent').innerHTML = rHTML;
+            } else {
+                document.getElementById('reportSection').classList.add('hidden');
+            }
+
+            // 清單生成
             fl.forEach(item => { const isInc = item.type === 'income'; net += isInc ? item.amount : -item.amount; if(!isInc) totalExp += item.amount;
                 const div = document.createElement('div'); div.className = "glass-card p-6 rounded-[2rem] flex justify-between items-center mb-4 border border-white dark:border-slate-800 shadow-sm animate-pop";
-                // 💡 修改：補回 Edit 按鈕
                 div.innerHTML = `<div><p class="font-black text-slate-800 dark:text-white text-sm">${item.category}${item.remark ? ` <span class="text-xs text-slate-400 font-bold ml-1">(${item.remark})</span>` : ''}${item.foreignText ? ` <span class="text-[10px] text-slate-400 border px-1.5 py-0.5 rounded-lg bg-slate-50 dark:bg-slate-700/50">(${item.foreignText})</span>` : ''}</p><p class="text-[9px] text-slate-400 mt-1 uppercase font-bold tracking-widest">${item.dateStr}</p></div><div class="text-right"><p class="font-black text-lg ${isInc?'text-emerald-500':'text-red-500'}">${isInc?'+':'-'}$${item.amount.toFixed(2)}</p><div class="flex gap-2 justify-end mt-1"><button onclick="window.editExpense(${item.id})" class="text-slate-400 text-[8px] font-black uppercase active:scale-90 transition-all">Edit</button><button onclick="window.deleteExpense(${item.id})" class="text-red-300 text-[8px] font-black uppercase active:scale-90 transition-all">Del</button></div></div>`; 
                 list.appendChild(div);
             });
