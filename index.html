@@ -168,7 +168,7 @@
         <canvas id="cameraCanvas" class="hidden"></canvas>
     </div>
 
-    <!-- 隱藏的檔案上傳元素 -->
+    <!-- 隱藏的檔案上傳元素 (供相簿識圖用) -->
     <input type="file" id="galleryInput" class="hidden" accept="image/*" onchange="window.handleGalleryUpload(event)">
 
     <!-- 數據管理與 AI 設定 -->
@@ -221,6 +221,14 @@
                 <input type="file" id="fileInput" class="hidden" accept=".json" onchange="window.handleFileImport(event)">
                 
                 <button onclick="window.handleResetApp()" class="w-full py-3 bg-rose-50 dark:bg-rose-900/20 text-rose-600 border border-rose-100 dark:border-rose-900 font-black rounded-2xl text-[9px] uppercase active:bg-rose-500 active:text-white transition-all mt-4">⚠️ 清空所有數據</button>
+                
+                <!-- 💡 補回的 Version 與 Logo 標示 -->
+                <div class="pt-6 pb-2 flex flex-col items-center justify-center opacity-40 pointer-events-none">
+                    <div class="w-10 h-10 bg-slate-200 dark:bg-slate-700 rounded-full flex items-center justify-center mb-2 shadow-inner">
+                        <span class="text-xl">💸</span>
+                    </div>
+                    <p class="text-[9px] font-black tracking-widest uppercase dark:text-slate-400">Version 56.0</p>
+                </div>
             </div>
         </div>
     </div>
@@ -1030,6 +1038,7 @@
         window.changeSplitMonth = function(s) { window.splitCalendarDate.setMonth(window.splitCalendarDate.getMonth() + s); window.renderSplitCalendar(); window.renderSplitItemsOnly(); };
         window.jumpToSplitDate = function() { window.splitCalendarDate.setFullYear(parseInt(document.getElementById('splitYearSelect').value)); window.splitCalendarDate.setMonth(parseInt(document.getElementById('splitMonthSelect').value)); window.renderSplitCalendar(); window.renderSplitItemsOnly(); };
 
+        // 💡 修正 2：分帳日曆消費總額改為紅色
         window.renderSplitCalendar = function() {
             const c = document.getElementById('splitCalendarDays'); if(!c) return;
             const y = window.splitCalendarDate.getFullYear(), m = window.splitCalendarDate.getMonth();
@@ -1107,6 +1116,7 @@
             } 
         };
 
+        // 💡 修正 1：分帳明細 Edit 功能 (精準跳轉)
         window.editSplitItem = function(itemId) {
             const event = window.splitEvents.find(e => e.id === window.currentEventId);
             if (!event) return;
