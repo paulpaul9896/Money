@@ -167,7 +167,7 @@
         <canvas id="cameraCanvas" class="hidden"></canvas>
     </div>
 
-    <!-- 隱藏的檔案上傳元素 -->
+    <!-- 隱藏的檔案上傳元素 (供相簿識圖用) -->
     <input type="file" id="galleryInput" class="hidden" accept="image/*" onchange="window.handleGalleryUpload(event)">
 
     <!-- 數據管理與 AI 設定 -->
@@ -223,7 +223,7 @@
                 
                 <div class="pt-6 pb-2 flex flex-col items-center justify-center opacity-40 pointer-events-none">
                     <div class="w-10 h-10 bg-slate-200 dark:bg-slate-700 rounded-full flex items-center justify-center mb-2 shadow-inner"><span class="text-xl">💸</span></div>
-                    <p class="text-[9px] font-black tracking-widest uppercase dark:text-slate-400">Version 50.0</p>
+                    <p class="text-[9px] font-black tracking-widest uppercase dark:text-slate-400">Version 51.0</p>
                 </div>
             </div>
         </div>
@@ -483,7 +483,6 @@
         window.currentType = 'expense'; 
         window.currentRecType = 'expense'; 
         
-        // 💡 分帳專用變數
         window.splitDetailTab = 'overview'; 
         window.splitCalendarDate = new Date();
         window.splitSelectedDateStr = new Date().toDateString();
@@ -497,7 +496,7 @@
         window.reloadLocalVars();
 
         // ==========================================
-        // 3. 雲端帳號與自動同步 (Continuous Sync)
+        // 3. 雲端帳號與自動同步
         // ==========================================
         window.registerAcc = async function() {
             const e = document.getElementById('authEmail').value, p = document.getElementById('authPwd').value;
@@ -665,13 +664,16 @@
             document.getElementById('aiLoadingOverlay').classList.replace('hidden', 'flex');
             const apiKey = localStorage.getItem('gemini_api_key');
             
-            const prompt = "Analyze this receipt. Extract Amount(number), Category(string, must be exactly one of: '餐飲','交通','購物','娛樂','醫療','日常','其他'), Merchant name (string, mapped to remark), Date (string, format YYYY-MM-DD).";
+            const prompt = `Analyze this receipt. Extract Amount(number), Category(string, must be one of: '餐飲','交通','購物','娛樂','醫療','日常','其他'), Merchant name (string, mapped to remark), Date (string, format YYYY-MM-DD). Return ONLY valid JSON.`;
             
             try {
                 const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
-                        contents: [{ parts: [{ text: prompt }, { inlineData: { mimeType: "image/jpeg", data: base64 } }] }], 
+                        contents: [{ 
+                            role: "user", 
+                            parts: [{ text: prompt }, { inlineData: { mimeType: "image/jpeg", data: base64 } }] 
+                        }], 
                         generationConfig: { 
                             responseMimeType: "application/json",
                             responseSchema: {
@@ -689,7 +691,9 @@
                 const resJson = await res.json();
                 if (resJson.error) throw new Error(resJson.error.message);
                 
-                const jsonText = resJson.candidates[0].content.parts[0].text;
+                let jsonText = resJson.candidates[0].content.parts[0].text;
+                // 強制清理可能的 markdown 標籤
+                jsonText = jsonText.replace(/```json/g, '').replace(/```/g, '').trim();
                 const data = JSON.parse(jsonText);
                 
                 document.getElementById('amountInput').value = data.amount || "";
@@ -697,13 +701,15 @@
                 document.getElementById('remarkInput').value = data.merchant || data.remark || "";
                 
                 if(data.date){ 
-                    window.selectedDateStr = new Date(data.date).toDateString(); 
+                    // 修正跨時區導致日期減一天的問題
+                    const localDateStr = data.date.replace(/-/g, '/');
+                    window.selectedDateStr = new Date(localDateStr).toDateString(); 
                     window.updateTargetDateUI(); 
                     window.renderCalendar(); 
                 }
                 window.showToast("✅ 辨識成功！");
             } catch(e) { 
-                console.error(e);
+                console.error("AI 錯誤:", e);
                 window.showToast("AI 辨識失敗 ❌"); 
             } finally {
                 document.getElementById('aiLoadingOverlay').classList.replace('flex', 'hidden');
@@ -883,7 +889,7 @@
         window.calcCurrencyPage = function() { const from = document.getElementById('currFrom').value, to = document.getElementById('currTo').value, amt = parseFloat(document.getElementById('currFromAmt').value)||0; if(!window.rawRates[from]||!window.rawRates[to]) return; document.getElementById('currToAmt').value = ((amt/window.rawRates[from])*window.rawRates[to]).toFixed(2); };
 
         // ==========================================
-        // 8. 分帳助手 (取消 全部/本月/單日 篩選按鈕，明細永遠顯示全部)
+        // 8. 分帳助手 (日曆升級版)
         // ==========================================
         window.renderEventList = function() { const l = document.getElementById('eventList'); if(!l) return; l.innerHTML = window.splitEvents.map(e => `<div class="glass-card p-6 rounded-[2rem] flex justify-between items-center mb-4 border active:scale-95 cursor-pointer text-left shadow-sm animate-pop" onclick="window.openEventDetail(${e.id})"><div><p class="text-[9px] font-black text-emerald-600 uppercase mb-1 tracking-widest">${e.date}</p><h4 class="font-black text-slate-800 dark:text-white text-base">${e.name}</h4></div><div class="text-right font-black text-lg text-emerald-600">$${(e.items||[]).reduce((s,i)=>s+i.amount,0).toFixed(2)}</div></div>`).join('') || '<p class="text-center text-slate-300 py-10 uppercase italic text-xs font-black tracking-widest">No Plans Found</p>'; };
         window.showCreateEvent = function() { document.getElementById('splitHome').classList.add('hidden'); document.getElementById('createEventSection').classList.remove('hidden'); const list = document.getElementById('memberInputsList'); list.innerHTML = ''; window.addMemberInputRow(""); window.addMemberInputRow(""); };
@@ -958,7 +964,7 @@
                 
                 contentDiv.innerHTML = html + settHtml;
             } else {
-                // 💡 明細分頁：移除全部/本月/單日篩選，只保留日曆與輸入框
+                // 💡 分帳日曆回歸
                 const selectedD = new Date(window.splitSelectedDateStr);
                 const defaultDateVal = `${selectedD.getFullYear()}-${String(selectedD.getMonth()+1).padStart(2,'0')}-${String(selectedD.getDate()).padStart(2,'0')}`;
 
@@ -982,7 +988,7 @@
                             <div>
                                 <div class="flex justify-between items-center mb-2">
                                     <label class="block text-[10px] font-black text-slate-400 uppercase ml-1">金額 (HKD)</label>
-                                    <button onclick="window.toggleSplitCurrency()" class="text-[9px] text-sky-500 font-black uppercase underline">🌍 外匯</button>
+                                    <button onclick="window.toggleSplitCurrency()" class="text-[9px] text-sky-500 font-black uppercase underline">🌍 匯率轉換</button>
                                 </div>
                                 <input type="number" id="itemAmount" placeholder="0.00" class="w-full px-5 py-4 bg-white dark:bg-slate-800 border-2 border-slate-50 dark:border-slate-700 rounded-[1.5rem] text-sm text-center font-black shadow-inner dark:text-white">
                             </div>
@@ -1023,6 +1029,7 @@
         window.changeSplitMonth = function(s) { window.splitCalendarDate.setMonth(window.splitCalendarDate.getMonth() + s); window.renderSplitCalendar(); window.renderSplitItemsOnly(); };
         window.jumpToSplitDate = function() { window.splitCalendarDate.setFullYear(parseInt(document.getElementById('splitYearSelect').value)); window.splitCalendarDate.setMonth(parseInt(document.getElementById('splitMonthSelect').value)); window.renderSplitCalendar(); window.renderSplitItemsOnly(); };
 
+        // 💡 修正：分帳日曆消費總額顯示邏輯
         window.renderSplitCalendar = function() {
             const c = document.getElementById('splitCalendarDays'); if(!c) return;
             const y = window.splitCalendarDate.getFullYear(), m = window.splitCalendarDate.getMonth();
@@ -1039,18 +1046,12 @@
                 let dayTotal = 0;
                 (event.items || []).forEach(item => {
                     const itemDate = item.date || event.date;
-                    let itemDateStr = "";
-                    if (itemDate.includes('-')) {
-                        const [iy, im, id] = itemDate.split('-');
-                        itemDateStr = new Date(iy, im-1, id).toDateString();
-                    } else if (itemDate.includes('/')) {
-                        const [iy, im, id] = itemDate.split('/');
-                        itemDateStr = new Date(iy, im-1, id).toDateString();
-                    }
-                    if (itemDateStr === ds) { dayTotal += item.amount; }
+                    // 將 YYYY-MM-DD 轉為 YYYY/MM/DD 以防止時區導致日期偏差
+                    const localDateStr = itemDate.replace(/-/g, '/');
+                    const dObj = new Date(localDateStr);
+                    if (dObj.toDateString() === ds) { dayTotal += item.amount; }
                 });
                 
-                // 💡 不再透過篩選決定是否顯示 isSelected，僅讓它反映當前選擇的輸入日期
                 const isSelected = (ds === window.splitSelectedDateStr);
                 const div = document.createElement('div'); 
                 div.className = `calendar-day hover:bg-sky-50 dark:hover:bg-slate-800 ${isSelected ? 'selected' : ''} ${ds === new Date().toDateString() ? 'is-today' : ''}`;
@@ -1063,7 +1064,7 @@
                     }
                     window.renderSplitCalendar(); 
                 };
-                let sumColor = isSelected ? 'text-white' : 'text-slate-500 dark:text-slate-400';
+                let sumColor = isSelected ? 'text-white' : 'text-emerald-500';
                 let sumHTML = dayTotal > 0 ? `<span class="text-[7px] font-black mt-1 ${sumColor}">$${Math.round(dayTotal)}</span>` : '';
                 div.innerHTML = `<span>${d}</span>${sumHTML}`; c.appendChild(div);
             }
@@ -1074,7 +1075,6 @@
             const list = document.getElementById('eventItemsList'); 
             if(!list) return;
             
-            // 💡 移除所有過濾邏輯，直接顯示該計畫內的所有項目
             list.innerHTML = (event.items || []).slice().reverse().map(item => {
                 const dateStr = item.date || event.date;
                 return `
