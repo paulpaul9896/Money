@@ -167,7 +167,7 @@
         <canvas id="cameraCanvas" class="hidden"></canvas>
     </div>
 
-    <!-- 隱藏的檔案上傳元素 (供相簿識圖用) -->
+    <!-- 隱藏的檔案上傳元素 -->
     <input type="file" id="galleryInput" class="hidden" accept="image/*" onchange="window.handleGalleryUpload(event)">
 
     <!-- 數據管理與 AI 設定 -->
@@ -223,7 +223,7 @@
                 
                 <div class="pt-6 pb-2 flex flex-col items-center justify-center opacity-40 pointer-events-none">
                     <div class="w-10 h-10 bg-slate-200 dark:bg-slate-700 rounded-full flex items-center justify-center mb-2 shadow-inner"><span class="text-xl">💸</span></div>
-                    <p class="text-[9px] font-black tracking-widest uppercase dark:text-slate-400">Version 51.0</p>
+                    <p class="text-[9px] font-black tracking-widest uppercase dark:text-slate-400">Version 53.0</p>
                 </div>
             </div>
         </div>
@@ -308,7 +308,7 @@
                     
                     <input type="hidden" id="editingId" value="">
                     <button id="addBtn" onclick="window.addExpense()" class="w-full bg-sky-500 text-white font-black py-6 rounded-[1.8rem] text-sm tracking-widest uppercase shadow-xl active:scale-95 transition-all">確認存檔</button>
-                    <button id="cancelEditBtn" onclick="window.resetForm()" class="w-full bg-slate-100 dark:bg-slate-800 text-slate-400 font-bold py-4 rounded-[1.5rem] text-[10px] uppercase hidden">取消修改</button>
+                    <button id="cancelEditBtn" onclick="window.resetForm()" class="w-full bg-slate-100 dark:bg-slate-800 text-slate-400 font-bold py-4 rounded-[1.5rem] text-[10px] uppercase hidden transition-all">取消修改</button>
                 </div>
             </div>
 
@@ -360,7 +360,7 @@
                 </div>
                 <input type="hidden" id="editingRecurringId" value="">
                 <button id="recurringAddBtn" onclick="window.addRecurring()" class="w-full bg-amber-500 text-white font-black py-6 rounded-[1.8rem] text-sm uppercase shadow-md active:scale-95 transition-all">確認存檔</button>
-                <button id="cancelRecurringEditBtn" onclick="window.resetRecurringForm()" class="w-full bg-slate-100 dark:bg-slate-800 text-slate-400 font-bold py-4 rounded-[1.5rem] text-[10px] uppercase hidden">取消修改</button>
+                <button id="cancelRecurringEditBtn" onclick="window.resetRecurringForm()" class="w-full bg-slate-100 dark:bg-slate-800 text-slate-400 font-bold py-4 rounded-[1.5rem] text-[10px] uppercase hidden transition-all">取消修改</button>
             </div>
             <div class="pb-10">
                 <div class="overflow-hidden rounded-[2rem] border glass-card shadow-sm">
@@ -605,7 +605,7 @@
         window.handleCloudRestore = () => window.showToast("登入帳號後，系統會自動下載資料！");
 
         // ==========================================
-        // 4. AI 雙軌識圖 (相機 + 相簿)
+        // 4. AI 雙軌識圖
         // ==========================================
         let cameraStream = null;
         window.triggerCamera = async function() {
@@ -692,7 +692,6 @@
                 if (resJson.error) throw new Error(resJson.error.message);
                 
                 let jsonText = resJson.candidates[0].content.parts[0].text;
-                // 強制清理可能的 markdown 標籤
                 jsonText = jsonText.replace(/```json/g, '').replace(/```/g, '').trim();
                 const data = JSON.parse(jsonText);
                 
@@ -701,7 +700,6 @@
                 document.getElementById('remarkInput').value = data.merchant || data.remark || "";
                 
                 if(data.date){ 
-                    // 修正跨時區導致日期減一天的問題
                     const localDateStr = data.date.replace(/-/g, '/');
                     window.selectedDateStr = new Date(localDateStr).toDateString(); 
                     window.updateTargetDateUI(); 
@@ -774,7 +772,7 @@
 
             fl.forEach(item => { const isInc = item.type === 'income'; net += isInc ? item.amount : -item.amount; if(!isInc) totalExp += item.amount;
                 const div = document.createElement('div'); div.className = "glass-card p-6 rounded-[2rem] flex justify-between items-center mb-4 border border-white dark:border-slate-800 shadow-sm animate-pop";
-                div.innerHTML = `<div><p class="font-black text-slate-800 dark:text-white text-sm">${item.category}${item.remark ? ` <span class="text-xs text-slate-400 font-bold ml-1">(${item.remark})</span>` : ''}${item.foreignText ? ` <span class="text-[10px] text-slate-400 border px-1.5 py-0.5 rounded-lg bg-slate-50 dark:bg-slate-700/50">(${item.foreignText})</span>` : ''}</p><p class="text-[9px] text-slate-400 mt-1 uppercase font-bold tracking-widest">${item.dateStr}</p></div><div class="text-right"><p class="font-black text-lg ${isInc?'text-emerald-500':'text-red-500'}">${isInc?'+':'-'}$${item.amount.toFixed(2)}</p><div class="flex gap-2 justify-end mt-1"><button onclick="window.editExpense(${item.id})" class="text-slate-400 text-[8px] font-black uppercase active:scale-90 transition-all">Edit</button><button onclick="window.deleteExpense(${item.id})" class="text-red-300 text-[8px] font-black uppercase active:scale-90 transition-all">Del</button></div></div>`; 
+                div.innerHTML = `<div><p class="font-black text-slate-800 dark:text-white text-sm">${item.category}${item.remark ? ` <span class="text-xs text-slate-400 font-bold ml-1">(${item.remark})</span>` : ''}${item.foreignText ? ` <span class="text-[10px] text-slate-400 border px-1.5 py-0.5 rounded-lg bg-slate-50 dark:bg-slate-700/50">(${item.foreignText})</span>` : ''}</p><p class="text-[9px] text-slate-400 mt-1 uppercase font-bold tracking-widest">${item.dateStr}</p></div><div class="text-right"><p class="font-black text-lg ${isInc?'text-emerald-500':'text-red-500'}">${isInc?'+':'-'}$${item.amount.toFixed(2)}</p><div class="flex gap-2 justify-end mt-1"><button onclick="window.editExpense(${item.id})" class="text-slate-400 text-[8px] font-black uppercase active:scale-90 transition-all border border-slate-200 dark:border-slate-600 rounded-lg px-2 py-1">Edit</button><button onclick="window.deleteExpense(${item.id})" class="text-red-300 text-[8px] font-black uppercase active:scale-90 transition-all border border-red-100 dark:border-red-900/30 rounded-lg px-2 py-1">Del</button></div></div>`; 
                 list.appendChild(div);
             });
             window.recurringExpenses.forEach(r => { const isInc = r.type === 'income', amt = (window.expenseFilter === 'year' && r.freq==='monthly') ? r.amount * 12 : r.amount; net += (isInc ? amt : -amt); if(!isInc) totalExp += amt; });
@@ -811,10 +809,16 @@
                 window.resetForm(); window.renderPersonalApp(); window.renderCalendar(); window.showToast("已存檔 ✨"); 
             }
         };
+        // 💡 精準滑動修正
         window.editExpense = function(id) {
             const i = window.expenses.find(e => e.id == id); if(!i) return;
             document.getElementById('amountInput').value = i.amount; document.getElementById('categoryInput').value = i.category; document.getElementById('remarkInput').value = i.remark || ''; document.getElementById('editingId').value = i.id;
-            window.personalForeignText = i.foreignText || ""; window.setEntryType(i.type || 'expense'); document.getElementById('addBtn').innerText = "確認修改記錄"; document.getElementById('cancelEditBtn').classList.remove('hidden'); window.selectedDateStr = i.dateStr; window.updateTargetDateUI(); window.renderCalendar(); window.scrollTo({ top: 300, behavior: 'smooth' });
+            window.personalForeignText = i.foreignText || ""; window.setEntryType(i.type || 'expense'); document.getElementById('addBtn').innerText = "確認修改記錄"; document.getElementById('cancelEditBtn').classList.remove('hidden'); window.selectedDateStr = i.dateStr; window.updateTargetDateUI(); window.renderCalendar(); 
+            
+            setTimeout(() => {
+                const el = document.getElementById('expenseEditorArea');
+                if(el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 50);
         };
         window.deleteExpense = function(id) { window.askConfirm("刪除紀錄？", "永久移除該帳目。", () => { window.expenses = window.expenses.filter(i => i.id !== id); window.saveToData(); window.renderPersonalApp(); window.renderCalendar(); }); };
         window.resetForm = function() { document.getElementById('amountInput').value = ''; document.getElementById('categoryInput').value = ''; document.getElementById('remarkInput').value = ''; window.personalForeignText = ""; document.getElementById('foreignAmount').value = ''; document.getElementById('editingId').value = ''; document.getElementById('addBtn').innerText = "確認存檔"; document.getElementById('cancelEditBtn').classList.add('hidden'); window.setEntryType('expense'); };
@@ -851,6 +855,7 @@
             window.saveToData(); window.resetRecurringForm(); window.renderRecurringApp(); window.renderPersonalApp(); window.renderCalendar(); window.showToast("定期項目已同步 ✨"); 
         };
 
+        // 💡 精準滑動修正
         window.editRecurring = function(id) { 
             const i = window.recurringExpenses.find(r => r.id == id); if (!i) return; 
             document.getElementById('recurringName').value = i.name; 
@@ -861,7 +866,11 @@
             window.setRecType(i.type || 'expense'); 
             document.getElementById('recurringAddBtn').innerText = "確認修改"; 
             document.getElementById('cancelRecurringEditBtn').classList.remove('hidden'); 
-            window.scrollTo({ top: 300, behavior: 'smooth' }); 
+            
+            setTimeout(() => {
+                const el = document.getElementById('recurringName');
+                if(el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 50);
         };
 
         window.resetRecurringForm = function() { 
@@ -889,7 +898,7 @@
         window.calcCurrencyPage = function() { const from = document.getElementById('currFrom').value, to = document.getElementById('currTo').value, amt = parseFloat(document.getElementById('currFromAmt').value)||0; if(!window.rawRates[from]||!window.rawRates[to]) return; document.getElementById('currToAmt').value = ((amt/window.rawRates[from])*window.rawRates[to]).toFixed(2); };
 
         // ==========================================
-        // 8. 分帳助手 (日曆升級版)
+        // 8. 分帳助手
         // ==========================================
         window.renderEventList = function() { const l = document.getElementById('eventList'); if(!l) return; l.innerHTML = window.splitEvents.map(e => `<div class="glass-card p-6 rounded-[2rem] flex justify-between items-center mb-4 border active:scale-95 cursor-pointer text-left shadow-sm animate-pop" onclick="window.openEventDetail(${e.id})"><div><p class="text-[9px] font-black text-emerald-600 uppercase mb-1 tracking-widest">${e.date}</p><h4 class="font-black text-slate-800 dark:text-white text-base">${e.name}</h4></div><div class="text-right font-black text-lg text-emerald-600">$${(e.items||[]).reduce((s,i)=>s+i.amount,0).toFixed(2)}</div></div>`).join('') || '<p class="text-center text-slate-300 py-10 uppercase italic text-xs font-black tracking-widest">No Plans Found</p>'; };
         window.showCreateEvent = function() { document.getElementById('splitHome').classList.add('hidden'); document.getElementById('createEventSection').classList.remove('hidden'); const list = document.getElementById('memberInputsList'); list.innerHTML = ''; window.addMemberInputRow(""); window.addMemberInputRow(""); };
@@ -930,10 +939,7 @@
                         <button onclick='window.showQRModal("${event.id}")' class='flex-1 py-3 bg-white/20 hover:bg-white/30 rounded-xl text-[10px] font-bold transition-all'>📱 QR Code</button>
                     </div>
                 </div>
-                <div class="flex bg-slate-200/50 dark:bg-slate-800/50 rounded-[1.8rem] p-1.5 mb-6 shadow-inner">
-                    <button onclick="window.setSplitDetailTab('overview')" class="flex-1 py-4 text-[11px] uppercase font-bold rounded-[1.2rem] ${window.splitDetailTab === 'overview' ? 'bg-white dark:bg-slate-700 text-emerald-600 shadow-sm' : 'text-slate-500'}">📊 概覽</button>
-                    <button onclick="window.setSplitDetailTab('expenses')" class="flex-1 py-4 text-[11px] uppercase font-bold rounded-[1.2rem] ${window.splitDetailTab === 'expenses' ? 'bg-white dark:bg-slate-700 text-emerald-600 shadow-sm' : 'text-slate-500'}">🧾 明細</button>
-                </div>
+                <div class="flex bg-slate-200/50 dark:bg-slate-800/50 rounded-[1.8rem] p-1.5 mb-6 shadow-inner"><button onclick="window.setSplitDetailTab('overview')" class="flex-1 py-4 text-[11px] uppercase font-bold rounded-[1.2rem] ${window.splitDetailTab === 'overview' ? 'bg-white dark:bg-slate-700 text-emerald-600 shadow-sm' : 'text-slate-500'}">📊 概覽</button><button onclick="window.setSplitDetailTab('expenses')" class="flex-1 py-4 text-[11px] uppercase font-bold rounded-[1.2rem] ${window.splitDetailTab === 'expenses' ? 'bg-white dark:bg-slate-700 text-emerald-600 shadow-sm' : 'text-slate-500'}">🧾 明細</button></div>
                 <div id="splitTabContent"></div>`;
             
             const contentDiv = document.getElementById('splitTabContent');
@@ -964,7 +970,6 @@
                 
                 contentDiv.innerHTML = html + settHtml;
             } else {
-                // 💡 分帳日曆回歸
                 const selectedD = new Date(window.splitSelectedDateStr);
                 const defaultDateVal = `${selectedD.getFullYear()}-${String(selectedD.getMonth()+1).padStart(2,'0')}-${String(selectedD.getDate()).padStart(2,'0')}`;
 
@@ -1018,7 +1023,9 @@
                             </div>
                         </div>
 
-                        <button onclick="window.addItemToEvent()" class="w-full bg-emerald-600 text-white font-black py-5 rounded-[1.5rem] text-sm uppercase shadow-xl active:scale-95 transition-all mt-2">確定入帳</button>
+                        <input type="hidden" id="editingSplitItemId" value="">
+                        <button id="addSplitItemBtn" onclick="window.addItemToEvent()" class="w-full bg-emerald-600 text-white font-black py-5 rounded-[1.5rem] text-sm uppercase shadow-xl active:scale-95 transition-all mt-2">確定入帳</button>
+                        <button id="cancelSplitEditBtn" onclick="window.resetSplitItemForm()" class="w-full bg-slate-100 dark:bg-slate-800 text-slate-400 font-bold py-4 rounded-[1.5rem] text-[10px] uppercase hidden mt-2 transition-all">取消修改</button>
                     </div>
                     <div id="eventItemsList" class="space-y-4 pb-10"></div>`;
                 window.renderSplitCalendar(); 
@@ -1029,7 +1036,7 @@
         window.changeSplitMonth = function(s) { window.splitCalendarDate.setMonth(window.splitCalendarDate.getMonth() + s); window.renderSplitCalendar(); window.renderSplitItemsOnly(); };
         window.jumpToSplitDate = function() { window.splitCalendarDate.setFullYear(parseInt(document.getElementById('splitYearSelect').value)); window.splitCalendarDate.setMonth(parseInt(document.getElementById('splitMonthSelect').value)); window.renderSplitCalendar(); window.renderSplitItemsOnly(); };
 
-        // 💡 修正：分帳日曆消費總額顯示邏輯
+        // 💡 修正 2：分帳日曆消費總額改為紅色 (Red-500)
         window.renderSplitCalendar = function() {
             const c = document.getElementById('splitCalendarDays'); if(!c) return;
             const y = window.splitCalendarDate.getFullYear(), m = window.splitCalendarDate.getMonth();
@@ -1046,7 +1053,6 @@
                 let dayTotal = 0;
                 (event.items || []).forEach(item => {
                     const itemDate = item.date || event.date;
-                    // 將 YYYY-MM-DD 轉為 YYYY/MM/DD 以防止時區導致日期偏差
                     const localDateStr = itemDate.replace(/-/g, '/');
                     const dObj = new Date(localDateStr);
                     if (dObj.toDateString() === ds) { dayTotal += item.amount; }
@@ -1064,7 +1070,7 @@
                     }
                     window.renderSplitCalendar(); 
                 };
-                let sumColor = isSelected ? 'text-white' : 'text-emerald-500';
+                let sumColor = isSelected ? 'text-white' : 'text-red-500';
                 let sumHTML = dayTotal > 0 ? `<span class="text-[7px] font-black mt-1 ${sumColor}">$${Math.round(dayTotal)}</span>` : '';
                 div.innerHTML = `<span>${d}</span>${sumHTML}`; c.appendChild(div);
             }
@@ -1086,7 +1092,10 @@
                     </div>
                     <div class="text-right">
                         <p class="font-black text-emerald-600">$${item.amount.toFixed(2)}</p>
-                        <button onclick="window.deleteSplitItem(${item.id})" class="text-red-300 text-[8px] font-black uppercase mt-2 active:scale-90 transition-all border border-red-100 rounded-lg px-2 py-1">Del</button>
+                        <div class="flex gap-1 justify-end mt-2">
+                            <button onclick="window.editSplitItem(${item.id})" class="text-slate-400 text-[8px] font-black uppercase active:scale-90 transition-all border border-slate-200 dark:border-slate-600 rounded-lg px-2 py-1">Edit</button>
+                            <button onclick="window.deleteSplitItem(${item.id})" class="text-red-300 text-[8px] font-black uppercase active:scale-90 transition-all border border-red-100 dark:border-red-900/30 rounded-lg px-2 py-1">Del</button>
+                        </div>
                     </div>
                 </div>`;
             }).join('') || '<p class="text-center text-slate-300 py-10 uppercase italic text-xs font-black tracking-widest">No Records</p>';
@@ -1105,6 +1114,73 @@
             } 
         };
 
+        // 💡 修正 1：分帳明細 Edit 功能 (精準跳轉)
+        window.editSplitItem = function(itemId) {
+            const event = window.splitEvents.find(e => e.id === window.currentEventId);
+            if (!event) return;
+            const item = event.items.find(i => i.id === itemId);
+            if (!item) return;
+
+            let desc = item.desc;
+            window.splitForeignText = "";
+            
+            const match = desc.match(/ \((JPY|TWD|USD|EUR|CNY) [\d.]+\)$/);
+            if (match) {
+                window.splitForeignText = match[0].trim().replace('(', '').replace(')', '');
+                desc = desc.replace(match[0], '');
+            }
+
+            document.getElementById('itemDesc').value = desc;
+            document.getElementById('itemAmount').value = item.amount;
+            document.getElementById('itemPayer').value = item.payer;
+            
+            if (item.date) {
+                document.getElementById('itemDate').value = item.date;
+                window.splitSelectedDateStr = new Date(item.date.replace(/-/g, '/')).toDateString();
+                window.renderSplitCalendar();
+            }
+
+            const checkboxes = document.querySelectorAll('input[name="part_check"]');
+            checkboxes.forEach(cb => {
+                cb.checked = item.participants.includes(cb.value);
+            });
+
+            const eidInput = document.getElementById('editingSplitItemId');
+            if (eidInput) eidInput.value = item.id;
+            
+            const addBtn = document.getElementById('addSplitItemBtn');
+            if (addBtn) addBtn.innerText = "確認修改";
+            
+            const cancelBtn = document.getElementById('cancelSplitEditBtn');
+            if (cancelBtn) cancelBtn.classList.remove('hidden');
+
+            setTimeout(() => {
+                const el = document.getElementById('itemDesc');
+                if(el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 50);
+        };
+
+        window.resetSplitItemForm = function() {
+            document.getElementById('itemDesc').value = '';
+            document.getElementById('itemAmount').value = '';
+            
+            const checkboxes = document.querySelectorAll('input[name="part_check"]');
+            checkboxes.forEach(cb => cb.checked = true);
+
+            const eidInput = document.getElementById('editingSplitItemId');
+            if (eidInput) eidInput.value = '';
+
+            window.splitForeignText = "";
+            const foreignInput = document.getElementById('splitForeignAmount');
+            if(foreignInput) foreignInput.value = '';
+
+            const addBtn = document.getElementById('addSplitItemBtn');
+            if (addBtn) addBtn.innerText = "確定入帳";
+            
+            const cancelBtn = document.getElementById('cancelSplitEditBtn');
+            if (cancelBtn) cancelBtn.classList.add('hidden');
+        };
+
         window.addItemToEvent = async function() { 
             let d = document.getElementById('itemDesc').value.trim()||'共同開支';
             const a = parseFloat(document.getElementById('itemAmount').value);
@@ -1118,14 +1194,23 @@
             
             const event = window.splitEvents.find(e => e.id === window.currentEventId); 
             event.items = event.items || []; 
-            event.items.push({ 
-                id: Date.now(), 
-                desc: d, 
-                amount: a, 
-                payer: p, 
-                participants: pts,
-                date: dateVal 
-            }); 
+            
+            const editingId = document.getElementById('editingSplitItemId')?.value;
+            if (editingId) {
+                const idx = event.items.findIndex(i => i.id == editingId);
+                if (idx !== -1) {
+                    event.items[idx] = { ...event.items[idx], desc: d, amount: a, payer: p, participants: pts, date: dateVal };
+                }
+            } else {
+                event.items.push({ 
+                    id: Date.now(), 
+                    desc: d, 
+                    amount: a, 
+                    payer: p, 
+                    participants: pts,
+                    date: dateVal 
+                }); 
+            }
             
             if(event.isCloud && window.db) {
                 try {
@@ -1134,12 +1219,9 @@
             }
             
             window.saveToData();
-            window.splitForeignText = ""; 
-            const foreignInput = document.getElementById('splitForeignAmount');
-            if(foreignInput) foreignInput.value = '';
-            
+            window.resetSplitItemForm();
             window.renderEventDetailInner(); 
-            window.showToast("已入帳 ✨");
+            window.showToast(editingId ? "已修改 ✨" : "已入帳 ✨");
         };
 
         window.deleteSplitItem = function(itemId) {
